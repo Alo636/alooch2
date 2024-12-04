@@ -1,0 +1,31 @@
+
+# interaccion con OpenAI y APIs
+openai==1.47.1
+requests==2.32.3 #para interactuar con otras APIs
+
+# desarrollo web
+flask==3.0.3
+WTForms==3.1.2 #para formularios
+Flask-Login==0.6.3 #para autenticacion 
+gunicorn==23.0.0 #para despliegue en produccion
+
+#Gestion de Datos
+SQLAlchemy==2.0.35 #ORM para bases de datos
+Flask-Migrate==4.0.7 #migraciones de bases de datos
+sqlite3 #modulo estandar para bases de datos SQLite, viene con python 
+
+# Seguridad
+python-dotenv==1.0.1 #gestion de variables de entorno 
+bcrypt==4.2.0 #encriptacion de contraseñas
+
+# Utilidades y Herramientas de Desarrollo
+pytest==8.3.3 #pruebas unitarias
+python-dateutil==2.9.0.post0 #manejo avanzado de fechas
+
+google-auth==2.36.0
+google-auth-oauthlib==1.2.1 
+google-auth-httplib2==0.2.0
+google-api-python-client==2.153.0
+
+
+
