@@ -1,9 +1,10 @@
 """
 disque
 """
-from chatbot.openai_client import procesar_respuesta_openai, generar_respuesta_con_openai, detectar_intenciones, responde_sin_funcion
+from chatbot.openai_client import procesar_respuesta_openai, generar_respuesta_con_openai, detectar_intenciones, responde_sin_funcion, summarize_history
 from chatbot.utils import elegir_instruccion
 from chatbot.functions import funciones_disponibles
+from chatbot.function_descriptions import function_descriptions_multiple
 import json
 import sys
 import os
@@ -13,20 +14,23 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 conversation_history = [
     {"role": "system", "content": "Este es el historial de la conversación."},
 ]
+
 max_tokens = 4096
 
 
-def pregunta_respuesta(prompt):
+def pregunta_respuesta(prompt, history):
+
+    if len(str(history)) > max_tokens:
+        history = summarize_history(history)
 
     data_texto = str(prompt).strip("{").strip("}")
 
-    output = procesar_respuesta_openai(
-        conversation_history, data_texto)
-    print(output)
-
-    if output.function_call == None:
+    if prompt.get("intencion") not in [func["name"] for func in function_descriptions_multiple]:
         return responde_sin_funcion(data_texto)
 
+    output = procesar_respuesta_openai(
+        history, prompt)
+    print(output)
     if hasattr(output, 'function_call'):
         function_name = output.function_call.name
         parameters = json.loads(output.function_call.arguments)
@@ -44,12 +48,12 @@ user_prompt = input()
 
 while user_prompt != ".":
     try:
-        intenciones = detectar_intenciones(user_prompt)
-    except Exception as e:
+        intenciones = detectar_intenciones(user_prompt, conversation_history)
+    except:
         intenciones = list(user_prompt)
 
     print(intenciones)
     for intencion in intenciones:
-        print(pregunta_respuesta(intencion))
+        print(pregunta_respuesta(intencion, conversation_history))
 
     user_prompt = input()

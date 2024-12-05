@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from chatbot.function_descriptions import function_descriptions_multiple
 import json
-from datetime import datetime
+from chatbot.utils import instrucciones_segun_intencion
 
 load_dotenv()
 
@@ -23,30 +23,18 @@ intenciones = ["hacer una reserva", "eliminar una reserva", "informarse sobre re
                "informarse sobre el menú", "saludar", "agradecer", "despedirse"]
 
 
-def procesar_respuesta_openai(historial, data_texto):
-    hoy = datetime.now()
-    if len(str(historial)) > max_tokens:
-        historial = summarize_history(historial)
+def procesar_respuesta_openai(historial, prompt):
 
-    instrucciones = f"""
-    Primero que todo, hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
-    Quiero que decidas cual es la función más adecuada según la intención del mensaje.  
-    Quiero que tomes los argumentos valorando los detalles. Sigue estos apuntes fielmente:
-    IMPORTANTE: No modifiques el texto. Ejemplo: Si pone "hola", como argumento "mensaje" será "hola".
-    IMPORTANTE: Ten en cuenta qué día es hoy. Todas las fechas serán posteriores a hoy.
-    1. Analízalo el tiempo que necesites y luego toma una decisión.
-    2. Recuerda que los meses equivalen a números (enero = 1, febrero = 2..., diciembre = 12).
-    3. De cara a tomar fechas como argumentos, cógelas con formato datetime (YYYY-MM-DD).
-    4. Si en el texto se pregunta por un día que está por detrás del actual, ten en cuenta que hay que cambiar de mes, si no, ten en cuenta que es el mismo mes.
-    5. Si en el texto se pregunta por un mes que está por detrás del actual, ten en cuenta que hay que cambiar de año.
-    6. En caso de que no se específiquen las horas, tómalas como argumento "todas"""
+    instrucciones = instrucciones_segun_intencion(prompt)
+
+    data_texto = str(prompt).strip("{").strip("}")
 
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "assistant",
                 "content": f"este es el historial de la conversación: {historial}"},
-            {"role": "user", "content": f"Tengo la siguiente información:\n\n{data_texto}\n\n{instrucciones}\n"},
+            {"role": "user", "content": f"Tengo la siguiente información:\n\n{data_texto}\n\nSigue estas instrucciones: {instrucciones}\n"},
             {"role": "assistant", "content": instrucciones}],
         functions=function_descriptions_multiple,
         function_call="auto",
@@ -130,7 +118,7 @@ def summarize_history(historial):
     return [{"role": "system", "content": summary}]
 
 
-def detectar_intenciones(text):
+def detectar_intenciones(text, historial):
     """
     Detecta todas las intenciones presentes en un texto, manteniendo el contexto.
 
@@ -146,16 +134,47 @@ def detectar_intenciones(text):
             "content": (
                 f"""Analiza el siguiente mensaje y detecta todas las intenciones presentes, 
                 pero sin dividir el texto. Devuelve una lista de intenciones encontradas 
-                y sus detalles, manteniendo el contexto compartido.
+                y sus detalles, manteniendo el contexto compartido. 
+                Quiero que leas el último mensaje del historial para obtener las intenciones del texto. Historial: {historial}.
+                Ejemplo: 
+                - Último mensaje del historial: 
 
-                Ejemplo:
+                Ejemplo 1:
                 - "Quiero saber el menú, reservar, saber la música que se va a pinchar y cuánta gente va a haber el domingo que viene" -> 
                   [
-                    {{"intencion": "saber_menú", "detalle": "El domingo que viene"}},
-                    {{"intencion": "reservar", "detalle": "El domingo que viene"}},
+                    {{"intencion": "info_menú", "detalle": "El domingo que viene"}},
+                    {{"intencion": "hacer_reserva", "detalle": "El domingo que viene"}},
                     {{"intencion": "saber_música", "detalle": "El domingo que viene"}},
                     {{"intencion": "saber_gente", "detalle": "El domingo que viene"}}
                   ]
+                Ejemplo 2:
+                - "Quiero eliminar una reserva y poner una reclamación" -> 
+                  [
+                    {{"intencion": "eliminar_reserva", "detalle": ""}},
+                    {{"intencion": "poner_reclamación", "detalle": ""}},
+                  ]
+                Ejemplo 3:
+                - "Hola que tal, quiero saber la disponibilidad para reservar que tenéis para mañana." -> 
+                  [
+                    {{"intencion": "saludar", "detalle": "Hola, que tal"}},
+                    {{"intencion": "info_reservas", "detalle": "para mañana"}},
+                  ]
+                Ejemplo 4:
+                - "Hasta luego" -> 
+                  [
+                    {{"intencion": "despedir", "detalle": "Hasta luego"}},
+                  ]
+                Ejemplo 5:
+                - "Gracias" -> 
+                  [
+                    {{"intencion": "agradecer", "detalle": "Gracias"}},
+                  ]
+                Ejemplo 6:
+                - "Quiero saber la disponibilidad para reservar mañana" -> 
+                  [
+                    {{"intencion": "info_reservas", "detalle": "para mañana"}},
+                  ]
+                
 
                 Texto: {text}
                 """

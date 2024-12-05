@@ -15,7 +15,7 @@ def elegir_instruccion(function):
         Si la el dia, el mes o el año no son recibidos, pregunta por ellos."
 
 """
-    elif function == "info_reservas_fechas_especificas":
+    elif function == "info_reservas":
         return """
         Sigue estos pasos:
         IMPORTANTE: No digas "Hola" ni saludes.
@@ -32,9 +32,10 @@ def elegir_instruccion(function):
         IMPORTANTE: No digas "Hola" ni saludes.
         IMPORTANTE: No le digas al usuario lo que te ha retornado la función. Solo dile lo que deba saber. Ejemplo: La funcion retorna "Hora no disponible", respuesta:
         "La hora que has solicitado no está disponible para reservar" o "El horario que has elegido no se encuentra disponible para reserva.", por ejemplo. No repitas siempre la misma respuesta.
-        1. Si la data es una string "Hora no dispobible", quiero que le informes al usuario que esa hora no está disponible para reservar.
-        2. Si la data es una string "Hora no recibida", quiero que preguntes al usuario sobre qué hora querría hacer la reserva.
-        3. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario sobre qué nombre querría hacer la reserva.
+        1. Si la data es una string "Fecha no recibida", quiero que le preguntes al usuario para cuándo sería la reserva.
+        2. Si la data es una string "Hora no dispobible", quiero que le informes al usuario que esa hora no está disponible para reservar.
+        3. Si la data es una string "Hora no recibida", quiero que preguntes al usuario sobre qué hora querría hacer la reserva.
+        4. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario sobre qué nombre querría hacer la reserva.
         En caso de que la data no sea ninguna de las anteriores sigue estos pasos:
         1. Confirma al usuario si la reserva se ha realizado o no viendo el argumento Reserva.
         2. Si la reserva no ha podido completarse, dile que esa hora ya está ocupada, sin muchas especificaciones.
@@ -143,3 +144,38 @@ def filtrar_dias_libres(data):
             resultado[dia] = "Todo ocupado"
 
     return resultado
+
+
+def instrucciones_segun_intencion(prompt):
+
+    hoy = datetime.now()
+    # Diccionario de intenciones y sus instrucciones asociadas
+    intenciones = {
+        "info_reservas": f"""Primero que todo, hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
+    Quiero que tomes los argumentos valorando los detalles. Sigue estos apuntes fielmente:
+    1. Recuerda que los meses equivalen a números (enero = 1, febrero = 2..., diciembre = 12).
+    2. De cara a tomar fechas como argumentos, cógelas con formato datetime (YYYY-MM-DD).
+    3. Si en el texto se pregunta por un día que está por detrás del actual, ten en cuenta que hay que cambiar de mes, si no, ten en cuenta que es el mismo mes.
+    4. Si en el texto se pregunta por un mes que está por detrás del actual, ten en cuenta que hay que cambiar de año.
+    5. En caso de que no se específiquen las horas, tómalas como argumento "".
+    6. En caso de que no se específique la fecha, tómala como argumento ""
+    """,
+
+        "info_menú": """Quiero que tomes los argumentos valorando los detalles.
+    En caso de que no se especifique el día, el mes o el agno, tómalos como argumento "".""",
+        "hacer_reserva": "Instrucciones para realizar una reserva",
+        "eliminar_reserva": "Instrucciones para eliminar una reserva",
+        "saludar": "Instrucciones para saludar",
+        "despedir": "Instrucciones para despedir",
+        "agradecer": "Instrucciones para agradecer"
+    }
+
+    # Obtener la intención desde el prompt
+    intencion = prompt.get("intencion")
+
+    # Buscar las instrucciones asociadas o devolver un error
+    instrucciones = intenciones.get(
+        intencion, "error en la identificación de instrucciones")
+
+    # Resultado
+    return instrucciones

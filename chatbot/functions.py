@@ -21,12 +21,12 @@ credentials = Credentials.from_service_account_file(
 service = build('sheets', 'v4', credentials=credentials)
 
 
-def info_reservas_fechas_especificas(fechas=None, horas=None):
+def info_reservas(fechas=None, horas=None):
     """
     Consulta la disponibilidad para un conjunto específico de fechas y horas.
     Las fechas deben ser proporcionadas como una cadena separada por comas.
     """
-    if fechas is None:
+    if fechas is None or fechas == "":
         return "Fechas no recibidas"
 
     disponibilidad = {}
@@ -37,7 +37,7 @@ def info_reservas_fechas_especificas(fechas=None, horas=None):
     fechas = [extraer_fecha_de_string(fecha.strip())
               for fecha in fechas.split(",")]
 
-    if horas is None or horas == "todas":
+    if horas is None or horas == "":
         horas = ["12:00", "13:00", "14:00", "15:00"]
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
@@ -63,20 +63,20 @@ def info_reservas_fechas_especificas(fechas=None, horas=None):
         clave = f"{fecha.strftime('%Y-%m-%d')} {hora}"
         disponibilidad[clave] = "Libre" if not valores_rango else valores_rango[0][0]
     dias_libres = filtrar_dias_libres(disponibilidad)
-    print(dias_libres)
     return dias_libres
 
 
-def hacer_reserva(fecha, hora, nombre):
+def hacer_reserva(fecha=None, hora=None, nombre=""):
     """
     Realiza una reserva en la hoja de cálculo de Google Sheets para un día y hora específicos.
     Devuelve un diccionario con la información de la reserva y su estado ("Completada" o "No completada").
     """
+    if fecha == "":
+        return "Fecha no recibida"
+    if hora == "":
+        return info_reservas(fecha, hora)
 
-    if hora == "todas":
-        return "Hora no recibida"
-
-    disponibilidad = info_reservas_fechas_especificas(
+    disponibilidad = info_reservas(
         fecha, [hora])
     if disponibilidad == "Hora no disponible":
         return disponibilidad
@@ -197,7 +197,7 @@ def despedir(mensaje):
 
 funciones_disponibles = {
     "info_menudeldia": info_menudeldia,
-    "info_reservas_fechas_especificas": info_reservas_fechas_especificas,
+    "info_reservas": info_reservas,
     "hacer_reserva": hacer_reserva,
     "eliminar_reserva": eliminar_reserva,
     "agradecimientos": agradecimientos,
