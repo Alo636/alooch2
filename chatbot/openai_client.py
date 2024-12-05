@@ -23,7 +23,7 @@ intenciones = ["hacer una reserva", "eliminar una reserva", "informarse sobre re
                "informarse sobre el menú", "saludar", "agradecer", "despedirse"]
 
 
-def procesar_respuesta_openai(intencion, historial):
+def procesar_respuesta_openai(historial, data_texto):
     hoy = datetime.now()
     if len(str(historial)) > max_tokens:
         historial = summarize_history(historial)
@@ -40,8 +40,6 @@ def procesar_respuesta_openai(intencion, historial):
     4. Si en el texto se pregunta por un día que está por detrás del actual, ten en cuenta que hay que cambiar de mes, si no, ten en cuenta que es el mismo mes.
     5. Si en el texto se pregunta por un mes que está por detrás del actual, ten en cuenta que hay que cambiar de año.
     6. En caso de que no se específiquen las horas, tómalas como argumento "todas"""
-
-    data_texto = str(intencion).strip("{").strip("}")
 
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -79,9 +77,7 @@ def generar_respuesta_con_openai(data, historial, instrucciones=""):
     mensaje_sistema = {
         "role": "system",
         "content": (
-            "Eres un asistente conversacional que elabora respuestas con información recibida. "
-            "No debes repetir saludos si ya se ha saludado en la conversación. "
-            "Responde de forma clara y útil, sin añadir información innecesaria."
+            "Eres un elaborador de respuestas con la información que le viene dada."
         )
     }
 
@@ -89,7 +85,7 @@ def generar_respuesta_con_openai(data, historial, instrucciones=""):
     mensaje_usuario = {
         "role": "user",
         "content": (
-            f"Tengo la siguiente información en formato JSON:\n\n"
+            f"Tengo la siguiente información:\n\n"
             f"{data_texto}\n\n"
             f"{instrucciones}\n"
             "Por favor, responde siguiendo estas instrucciones."

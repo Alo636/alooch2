@@ -5,4 +5,4 @@ venv/
 __pycache__/
 *.pyc
 .env
-credenciales/spatial-country-441311-v6-d201f3c34438.json
+credenciales/

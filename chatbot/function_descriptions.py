@@ -21,7 +21,7 @@ function_descriptions_multiple = [
 
     },
     {
-        "name": "info_reservas_fechas_especificas",
+        "name": "info_reservas",
         "description": "La intención es obtener información sobre la disponibilidad de reservas.",
         "parameters": {
             "type": "object",
@@ -77,7 +77,7 @@ function_descriptions_multiple = [
         },
     },
     {
-        "name": "agradecimientos",
+        "name": "agradecer",
         "description": "La intención es agradecer o halagar.",
         "parameters": {
             "type": "object",

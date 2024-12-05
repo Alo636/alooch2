@@ -1,6 +1,4 @@
 from chatbot.openai_client import detectar_intenciones
-from nltk.tokenize import sent_tokenize
-import json
 
 # Texto de ejemplo
 text = "reservar para el 20 del 12 y saber el menu"

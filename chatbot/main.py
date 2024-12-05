@@ -2,7 +2,7 @@
 disque
 """
 from chatbot.openai_client import procesar_respuesta_openai, generar_respuesta_con_openai, detectar_intenciones, responde_sin_funcion
-from chatbot.utils import elegir_instruccion, frases_separadas_a_lista
+from chatbot.utils import elegir_instruccion
 from chatbot.functions import funciones_disponibles
 import json
 import sys
@@ -18,11 +18,14 @@ max_tokens = 4096
 
 def pregunta_respuesta(prompt):
 
+    data_texto = str(prompt).strip("{").strip("}")
+
     output = procesar_respuesta_openai(
-        prompt, conversation_history)
+        conversation_history, data_texto)
+    print(output)
 
     if output.function_call == None:
-        return responde_sin_funcion(prompt)
+        return responde_sin_funcion(data_texto)
 
     if hasattr(output, 'function_call'):
         function_name = output.function_call.name
@@ -40,7 +43,11 @@ def pregunta_respuesta(prompt):
 user_prompt = input()
 
 while user_prompt != ".":
-    intenciones = detectar_intenciones(user_prompt)
+    try:
+        intenciones = detectar_intenciones(user_prompt)
+    except Exception as e:
+        intenciones = list(user_prompt)
+
     print(intenciones)
     for intencion in intenciones:
         print(pregunta_respuesta(intencion))

@@ -3,12 +3,12 @@ disque
 """
 from datetime import datetime
 from collections import defaultdict
-from nltk.tokenize import sent_tokenize
 
 
 def elegir_instruccion(function):
     if function == "info_menudeldia":
         return """
+        IMPORTANTE: No digas "Hola" ni saludes.
         Busca y proporciona el menú del día exacto que se menciona en el texto del usuario. 
         Si el texto incluye una fecha específica, usa esa fecha. 
         Por ejemplo, si dice '7 de diciembre de 2024', responde con 'El menú para el día 7 de diciembre de 2024 es...'. 
@@ -18,6 +18,7 @@ def elegir_instruccion(function):
     elif function == "info_reservas_fechas_especificas":
         return """
         Sigue estos pasos:
+        IMPORTANTE: No digas "Hola" ni saludes.
         1. Las horas que te llegan son las horas que hay libres.
         2. Si obtienes una string "Hora no disponible significa que la hora no está disponible".
         3. Informa sobre las horas libres que hay.
@@ -28,6 +29,7 @@ def elegir_instruccion(function):
     elif function == "hacer_reserva":
         return """
         Sigue estos pasos:
+        IMPORTANTE: No digas "Hola" ni saludes.
         IMPORTANTE: No le digas al usuario lo que te ha retornado la función. Solo dile lo que deba saber. Ejemplo: La funcion retorna "Hora no disponible", respuesta:
         "La hora que has solicitado no está disponible para reservar" o "El horario que has elegido no se encuentra disponible para reserva.", por ejemplo. No repitas siempre la misma respuesta.
         1. Si la data es una string "Hora no dispobible", quiero que le informes al usuario que esa hora no está disponible para reservar.
@@ -40,11 +42,13 @@ def elegir_instruccion(function):
         """
     elif function == "eliminar_reserva":
         return """
+        IMPORTANTE: No digas "Hola" ni saludes.
         Informa al usuario si se ha eliminado la reserva. 
         En caso contrario, informa del error que ha habido.
         """
     elif function == "agradecimientos":
         return """
+        IMPORTANTE: No digas "Hola" ni saludes.
         Responde al usuario por sus agradecimientos de una forma cordial.
         """
     elif function == "saludar":
@@ -53,6 +57,7 @@ def elegir_instruccion(function):
         """
     elif function == "despedir":
         return """
+        IMPORTANTE: No digas "Hola" ni saludes.
         Responde al mensaje de despedida del usuario de una forma cordial de no más de 20 palabras.
         """
     elif function == "ninguna_funcion":
@@ -138,9 +143,3 @@ def filtrar_dias_libres(data):
             resultado[dia] = "Todo ocupado"
 
     return resultado
-
-
-def frases_separadas_a_lista(frases):
-
-    # Tokenizar oraciones
-    return sent_tokenize(frases)
