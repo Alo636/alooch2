@@ -142,7 +142,7 @@ def detectar_intenciones(text, historial):
                 Ejemplo 1:
                 - "Quiero saber el menú, reservar, saber la música que se va a pinchar y cuánta gente va a haber el domingo que viene" -> 
                   [
-                    {{"intencion": "info_menú", "detalle": "El domingo que viene"}},
+                    {{"intencion": "info_menu", "detalle": "El domingo que viene"}},
                     {{"intencion": "hacer_reserva", "detalle": "El domingo que viene"}},
                     {{"intencion": "saber_música", "detalle": "El domingo que viene"}},
                     {{"intencion": "saber_gente", "detalle": "El domingo que viene"}}
@@ -196,7 +196,7 @@ def detectar_intenciones(text, historial):
 
 def responde_sin_funcion(message):
     prompt = [
-        {"role": "system", "content": "Responde a este mensaje como respondería una persona que trabaja en un restaurante."},
+        {"role": "system", "content": "Responde a este mensaje como respondería una persona que trabaja en un restaurante. IMPORTANTE: Solo quiero que saludes cuando el input sea un saludo."},
         {"role": "user", "content": message}
     ]
 

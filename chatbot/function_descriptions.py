@@ -1,18 +1,12 @@
 
 function_descriptions_multiple = [
     {
-        "name": "info_menudeldia",
+        "name": "info_menu",
         "description": "La intención es obtener información sobre el menú.",
         "parameters": {
             "type": "object",
             "properties": {
-                "dia": {
-                    "type": "string",
-                },
-                "mes": {
-                    "type": "string",
-                },
-                "agno": {
+                "fecha": {
                     "type": "string",
                 },
             },
@@ -27,16 +21,18 @@ function_descriptions_multiple = [
             "type": "object",
             "properties": {
                 "fechas": {
-                    "type": "string",
+                    "type": ["string", "null"],
+                    "description": "La fecha de la reserva en formato YYYY-MM-DD.",
                 },
                 "horas": {
-                    "type": "string",
+                    "type": ["string", "null"],
+                    "description": "La hora de la reserva en formato HH:MM.",
                 },
             },
-            "required": ["dia", "horas"],
+            "required": [],
         },
-
     },
+
     {
         "name": "hacer_reserva",
         "description": "La intención es hacer una reserva.",
@@ -44,16 +40,18 @@ function_descriptions_multiple = [
             "type": "object",
             "properties": {
                 "fecha": {
-                    "type": "string",
+                    "type": ["string", "null"],
+                    "description": "La fecha de la reserva en formato YYYY-MM-DD.",
                 },
                 "hora": {
-                    "type": "string",
+                    "type": ["string", "null"],
+                    "description": "La hora de la reserva en formato HH:MM.",
                 },
                 "nombre": {
-                    "type": "string",
+                    "type": ["string", "null"],
                 },
             },
-            "required": ["fecha", "hora", "nombre"],
+            "required": [],
         },
 
     },
@@ -64,52 +62,18 @@ function_descriptions_multiple = [
             "type": "object",
             "properties": {
                 "fecha": {
-                    "type": "string",
+                    "type": ["string", "null"],
+                    "description": "La fecha de la reserva en formato YYYY-MM-DD.",
                 },
                 "hora": {
-                    "type": "string",
+                    "type": ["string", "null"],
+                    "description": "La hora de la reserva en formato HH:MM.",
                 },
                 "nombre": {
-                    "type": "string",
+                    "type": ["string", "null"],
                 },
             },
-            "required": ["dia", "nombre"],
-        },
-    },
-    {
-        "name": "agradecer",
-        "description": "La intención es agradecer o halagar.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "mensaje": {
-                    "type": "string",
-                },
-            },
-        },
-    },
-    {
-        "name": "saludar",
-        "description": "La intención es saludar.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "mensaje": {
-                    "type": "string",
-                },
-            },
-        },
-    },
-    {
-        "name": "despedir",
-        "description": "La intención es despedirse o marcharse.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "mensaje": {
-                    "type": "string",
-                },
-            },
+            "required": [],
         },
     },
 ]

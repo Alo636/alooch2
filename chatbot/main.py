@@ -47,10 +47,7 @@ def pregunta_respuesta(prompt, history):
 user_prompt = input()
 
 while user_prompt != ".":
-    try:
-        intenciones = detectar_intenciones(user_prompt, conversation_history)
-    except:
-        intenciones = list(user_prompt)
+    intenciones = detectar_intenciones(user_prompt, conversation_history)
 
     print(intenciones)
     for intencion in intenciones:

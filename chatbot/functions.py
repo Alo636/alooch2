@@ -26,7 +26,7 @@ def info_reservas(fechas=None, horas=None):
     Consulta la disponibilidad para un conjunto específico de fechas y horas.
     Las fechas deben ser proporcionadas como una cadena separada por comas.
     """
-    if fechas is None or fechas == "":
+    if fechas is None:
         return "Fechas no recibidas"
 
     disponibilidad = {}
@@ -37,7 +37,7 @@ def info_reservas(fechas=None, horas=None):
     fechas = [extraer_fecha_de_string(fecha.strip())
               for fecha in fechas.split(",")]
 
-    if horas is None or horas == "":
+    if horas is None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
@@ -71,9 +71,9 @@ def hacer_reserva(fecha=None, hora=None, nombre=""):
     Realiza una reserva en la hoja de cálculo de Google Sheets para un día y hora específicos.
     Devuelve un diccionario con la información de la reserva y su estado ("Completada" o "No completada").
     """
-    if fecha == "":
+    if fecha is None:
         return "Fecha no recibida"
-    if hora == "":
+    if hora is None:
         return info_reservas(fecha, hora)
 
     disponibilidad = info_reservas(
@@ -81,7 +81,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=""):
     if disponibilidad == "Hora no disponible":
         return disponibilidad
 
-    if nombre == "":
+    if nombre is None:
         return "Nombre no recibido"
 
     fecha_dt = extraer_fecha_de_string(fecha)
@@ -145,7 +145,7 @@ def eliminar_reserva(fecha=None, nombre=None, hora=None):
     mes = str(fecha_dt.month)
     agno = str(fecha_dt.year)
 
-    if hora is None or hora == "todas":
+    if hora is None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
     else:
         horas = [hora]
@@ -168,39 +168,28 @@ def eliminar_reserva(fecha=None, nombre=None, hora=None):
         return "Nombre incorrecto"
 
 
-def info_menudeldia(dia="No recibido", mes="No recibido", agno="No recibido"):
+def info_menu(fecha):
+    if fecha is None:
+        return "Fecha no recibida"
+
+    fecha_dt = extraer_fecha_de_string(fecha)
+    dia = str(fecha_dt.day)
+
     if dia == "1":
         menu = "1-Patatas, 2-Carne"
     else:
         menu = "1-Bistec, 2-Verduritas"
 
     info = {
-        "dia": dia,
-        "mes": mes,
-        "agno": agno,
-        "menu": menu
+        "fecha": fecha,
+        "menu": menu,
     }
     return json.dumps(info)
 
 
-def agradecimientos(mensaje):
-    return mensaje
-
-
-def saludar(mensaje):
-    return mensaje
-
-
-def despedir(mensaje):
-    return mensaje
-
-
 funciones_disponibles = {
-    "info_menudeldia": info_menudeldia,
+    "info_menu": info_menu,
     "info_reservas": info_reservas,
     "hacer_reserva": hacer_reserva,
     "eliminar_reserva": eliminar_reserva,
-    "agradecimientos": agradecimientos,
-    "saludar": saludar,
-    "despedir": despedir,
 }
