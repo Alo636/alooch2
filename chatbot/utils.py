@@ -6,7 +6,7 @@ from collections import defaultdict
 
 
 def elegir_instruccion(function):
-    if function == "info_menudeldia":
+    if function == "info_menu":
         return """
         IMPORTANTE: No digas "Hola" ni saludes.
         Busca y proporciona el menú del día exacto que se menciona en el texto del usuario. 
@@ -46,25 +46,6 @@ def elegir_instruccion(function):
         IMPORTANTE: No digas "Hola" ni saludes.
         Informa al usuario si se ha eliminado la reserva. 
         En caso contrario, informa del error que ha habido.
-        """
-    elif function == "agradecimientos":
-        return """
-        IMPORTANTE: No digas "Hola" ni saludes.
-        Responde al usuario por sus agradecimientos de una forma cordial.
-        """
-    elif function == "saludar":
-        return """
-        Responde al usuario por su saludo de una forma cordial de no más de 15 palabras.
-        """
-    elif function == "despedir":
-        return """
-        IMPORTANTE: No digas "Hola" ni saludes.
-        Responde al mensaje de despedida del usuario de una forma cordial de no más de 20 palabras.
-        """
-    elif function == "ninguna_funcion":
-        return """
-        Responde al mensaje del usuario. Si es algo que no está relacionado con el restaurante, di que no puedes responder a eso. En caso de que no entiendas
-        el mensaje, informa al usuario de que no le has entendido.
         """
     return ""
 
