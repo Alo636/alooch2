@@ -29,19 +29,17 @@ def procesar_respuesta_openai(historial, prompt):
 
     data_texto = str(prompt).strip("{").strip("}")
 
+    historial.append({"role": "user", "content": data_texto})
+
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "assistant",
-                "content": f"este es el historial de la conversación: {historial}"},
-            {"role": "user", "content": f"Tengo la siguiente información:\n\n{data_texto}\n\nSigue estas instrucciones: {instrucciones}\n"},
-            {"role": "assistant", "content": instrucciones}],
+            {"role": "user", "content": f"Tengo la siguiente información:\n\n{historial}\n\n"},
+            {"role": "assistant", "content": f"Sigue estas instrucciones: {instrucciones}\n"},],
         functions=function_descriptions_multiple,
         function_call="auto",
         temperature=0,
     )
-    historial.append(
-        {"role": "user", "content": data_texto})
     return completion.choices[0].message
 
 
@@ -135,9 +133,18 @@ def detectar_intenciones(text, historial):
                 f"""Analiza el siguiente mensaje y detecta todas las intenciones presentes, 
                 pero sin dividir el texto. Devuelve una lista de intenciones encontradas 
                 y sus detalles, manteniendo el contexto compartido. 
-                Quiero que leas el último mensaje del historial para obtener las intenciones del texto. Historial: {historial}.
+                Este es el historial de la conversacion, quiero que lo uses para responder al mensaje. Historial: {historial}.
+                Mensaje: {text}.
                 Ejemplo: 
-                - Último mensaje del historial: 
+                - Últimos mensajes del historial:
+                    - Quiero reservar para hoy.
+                    - Estas son las horas disponibles: 12:00, 13:00.
+                    - a las 12 entonces.
+                    - Necesito que me proporciones un nombre.
+                    - alejandro.
+                    -> [
+                    {{"intencion": "hacer_reserva", "detalle": "hoy a las 12 nombre alejandro"}},
+                  ]
 
                 Ejemplo 1:
                 - "Quiero saber el menú, reservar, saber la música que se va a pinchar y cuánta gente va a haber el domingo que viene" -> 
@@ -174,9 +181,6 @@ def detectar_intenciones(text, historial):
                   [
                     {{"intencion": "info_reservas", "detalle": "para mañana"}},
                   ]
-                
-
-                Texto: {text}
                 """
             )
         }

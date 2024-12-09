@@ -12,7 +12,6 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 conversation_history = [
-    {"role": "system", "content": "Este es el historial de la conversación."},
 ]
 
 max_tokens = 4096
@@ -54,3 +53,7 @@ while user_prompt != ".":
         print(pregunta_respuesta(intencion, conversation_history))
 
     user_prompt = input()
+
+perro = "perrete"
+print(perro)
+#eskerepupupum

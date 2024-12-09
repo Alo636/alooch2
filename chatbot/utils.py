@@ -69,7 +69,11 @@ def elegir_instruccion(function):
     return ""
 
 
-def conversion_a_rango(dia="No recibido", mes="No recibido", agno="No recibido", hora="No recibida"):
+def conversion_a_rango(fecha=None, hora=None):
+
+    dia = str(fecha.day)
+    mes = str(fecha.month)
+    agno = str(fecha.year)
     # Mapeo de horas a columnas
     horas_a_columnas = {
         "12:00": "B",
@@ -79,7 +83,7 @@ def conversion_a_rango(dia="No recibido", mes="No recibido", agno="No recibido",
     }
 
     # Validar entrada
-    if dia == "No recibido" or hora == "No recibida" or mes == "No recibido" or agno == "No recibido":
+    if fecha == None or hora == None:
         return {"error": "Faltan datos"}
     # Obtener columna correspondiente o retornar error si la hora no está disponible
     columna = horas_a_columnas.get(hora)

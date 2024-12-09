@@ -26,7 +26,7 @@ def info_reservas(fechas=None, horas=None):
     Consulta la disponibilidad para un conjunto específico de fechas y horas.
     Las fechas deben ser proporcionadas como una cadena separada por comas.
     """
-    if fechas is None:
+    if fechas == None:
         return "Fechas no recibidas"
 
     disponibilidad = {}
@@ -37,17 +37,16 @@ def info_reservas(fechas=None, horas=None):
     fechas = [extraer_fecha_de_string(fecha.strip())
               for fecha in fechas.split(",")]
 
-    if horas is None:
+    if horas == None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
 
+    print(fechas_horas)
+
     rangos = []
     for fecha, hora in fechas_horas:
-        dia = str(fecha.day)
-        mes = str(fecha.month)
-        agno = str(fecha.year)
-        conversion = conversion_a_rango(dia, mes, agno, hora)
+        conversion = conversion_a_rango(fecha, hora)
         if conversion == {"error": "Hora no disponible"}:
             return "Hora no disponible"
         rangos.append(conversion)
@@ -66,7 +65,7 @@ def info_reservas(fechas=None, horas=None):
     return dias_libres
 
 
-def hacer_reserva(fecha=None, hora=None, nombre=""):
+def hacer_reserva(fecha=None, hora=None, nombre=None):
     """
     Realiza una reserva en la hoja de cálculo de Google Sheets para un día y hora específicos.
     Devuelve un diccionario con la información de la reserva y su estado ("Completada" o "No completada").
@@ -88,10 +87,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=""):
     key = f"{fecha_dt.strftime('%Y-%m-%d')}"
     if disponibilidad.get(key) == [f'{fecha} {hora}']:
         rangos = []
-        dia = str(fecha_dt.day)
-        mes = str(fecha_dt.month)
-        agno = str(fecha_dt.year)
-        conversion = conversion_a_rango(dia, mes, agno, hora)
+        conversion = conversion_a_rango(fecha_dt, hora)
         if conversion == {"error": "Hora no disponible"}:
             return "Hora no disponible"
         rangos.append(conversion)
