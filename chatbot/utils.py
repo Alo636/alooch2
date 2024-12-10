@@ -8,44 +8,39 @@ from collections import defaultdict
 def elegir_instruccion(function):
     if function == "info_menu":
         return """
-        IMPORTANTE: No digas "Hola" ni saludes.
-        Busca y proporciona el menú del día exacto que se menciona en el texto del usuario. 
-        Si el texto incluye una fecha específica, usa esa fecha. 
-        Por ejemplo, si dice '7 de diciembre de 2024', responde con 'El menú para el día 7 de diciembre de 2024 es...'. 
-        Si la el dia, el mes o el año no son recibidos, pregunta por ellos."
+        Quiero que informes sobre el menú del día solicitado.
+        Si recibes "Fecha no recibida", pide al usuario que te facilite la fecha.
 
 """
     elif function == "info_reservas":
         return """
         Sigue estos pasos:
-        IMPORTANTE: No digas "Hola" ni saludes.
         1. Las horas que te llegan son las horas que hay libres.
-        2. Si obtienes una string "Hora no disponible significa que la hora no está disponible".
-        3. Informa sobre las horas libres que hay.
-        4. Si no hay ninguna hora libre, infórmalo sin dar detalles de las reservas.
-        Ejemplo de respuesta: "Hola, gracias por tu consulta. Aquí te informo sobre la disponibilidad para el 2 de diciembre de 2024:
-        A las 15:00, tenemos una mesa libre.
+        2. Si obtienes una string "Fechas no recibidas" pide al usuario que te facilite la fecha por la que quiere preguntar.
+        3. Si obtienes una string "Hora no disponible" informa al usuario sobre que esa hora no está disponible.
+        4. Informa sobre las horas libres que hay.
+        5. Si no hay ninguna hora libre, infórmalo sin dar detalles de las reservas.
 """
     elif function == "hacer_reserva":
         return """
         Sigue estos pasos:
-        IMPORTANTE: No digas "Hola" ni saludes.
-        IMPORTANTE: No le digas al usuario lo que te ha retornado la función. Solo dile lo que deba saber. Ejemplo: La funcion retorna "Hora no disponible", respuesta:
-        "La hora que has solicitado no está disponible para reservar" o "El horario que has elegido no se encuentra disponible para reserva.", por ejemplo. No repitas siempre la misma respuesta.
         1. Si la data es una string "Fecha no recibida", quiero que le preguntes al usuario para cuándo sería la reserva.
         2. Si la data es una string "Hora no dispobible", quiero que le informes al usuario que esa hora no está disponible para reservar.
-        3. Si la data es una string "Hora no recibida", quiero que preguntes al usuario sobre qué hora querría hacer la reserva.
-        4. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario sobre qué nombre querría hacer la reserva.
+        3. Si la data es una string "Hora no recibida", quiero que pidas al usuario qué hora querría hacer la reserva.
+        4. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario a qué nombre querría hacer la reserva.
         En caso de que la data no sea ninguna de las anteriores sigue estos pasos:
         1. Confirma al usuario si la reserva se ha realizado o no viendo el argumento Reserva.
-        2. Si la reserva no ha podido completarse, dile que esa hora ya está ocupada, sin muchas especificaciones.
-        3. Si la reserva se ha completado, incluye en tu respuesta los detalles de la misma.
+        2. Si la reserva se ha completado, incluye en tu respuesta los detalles de la misma.
         """
     elif function == "eliminar_reserva":
         return """
-        IMPORTANTE: No digas "Hola" ni saludes.
-        Informa al usuario si se ha eliminado la reserva. 
-        En caso contrario, informa del error que ha habido.
+        IMPORTANTE: No le digas al usuario la información que recibes.
+        Sigue estos pasos:
+        1. Si la data es una string "Fecha no recibida", quiero que le preguntes al usuario la fecha de su reserva.
+        2. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario a qué nombre está hecha su reserva.
+        3. Si la data es una string "Hora erronea", quiero que informes al usuario de que ha proporcionado una hora erronea.
+        En caso de que la data no sea ninguna de las anteriores:
+        Informa al usuario de que su reserva se ha eliminado.
         """
     return ""
 
@@ -146,9 +141,13 @@ def instrucciones_segun_intencion(prompt):
         3. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
         Ajusta automáticamente el mes y el año si es necesario.
         4. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-        5. Si no se especifican las horas o la fecha, establece estos argumentos como None.
+        5. Si no se especifican las fechas o las horas, establece estos argumentos como None.
 
         Sigue estas reglas de forma estricta para procesar correctamente los datos.
+        Ejemplos si hoy fuese 10 de diciembre:
+            Ejemplo1: "'intencion': 'info_reservas', 'detalle': 'disponibilidad para reservar'" -> fechas:null, horas:null
+            Ejemplo2: "'intencion': 'info_reservas', 'detalle': 'disponibilidad para reservar mañana'" -> fechas:2024-12-11, horas:null
+            Ejemplo3: "'intencion': 'info_reservas', 'detalle': 'información para reservar pasado mañana a las 12 '" -> fechas:2024-12-12, horas:12:00
         """,
 
         "info_menu":

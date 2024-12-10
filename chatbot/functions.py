@@ -42,8 +42,6 @@ def info_reservas(fechas=None, horas=None):
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
 
-    print(fechas_horas)
-
     rangos = []
     for fecha, hora in fechas_horas:
         conversion = conversion_a_rango(fecha, hora)
@@ -137,9 +135,9 @@ def eliminar_reserva(fecha=None, nombre=None, hora=None):
 
     # pylint: disable=no-member
     fecha_dt = extraer_fecha_de_string(fecha)
-    dia = str(fecha_dt.day)
-    mes = str(fecha_dt.month)
-    agno = str(fecha_dt.year)
+
+    if hora != None and hora != "12:00" and hora != "13:00" and hora != "14:00" and hora != "15:00":
+        return "Hora erronea"
 
     if hora is None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
@@ -148,7 +146,7 @@ def eliminar_reserva(fecha=None, nombre=None, hora=None):
     name = "."
 
     for hour in horas:
-        rang = conversion_a_rango(dia, mes, agno, hour)
+        rang = conversion_a_rango(fecha_dt, hour)
         name = obtener_nombre(rang)
         if name == nombre:
             break

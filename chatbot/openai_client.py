@@ -43,7 +43,7 @@ def procesar_respuesta_openai(historial, prompt):
     return completion.choices[0].message
 
 
-def generar_respuesta_con_openai(data, historial, instrucciones=""):
+def generar_respuesta_con_openai(data, historial, instrucciones):
     """
     Genera una respuesta en lenguaje natural basada en el contenido de 'data'.
 
@@ -135,19 +135,30 @@ def detectar_intenciones(text, historial):
                 y sus detalles, manteniendo el contexto compartido. 
                 Este es el historial de la conversacion, quiero que lo uses para responder al mensaje. Historial: {historial}.
                 Mensaje: {text}.
-                Ejemplo: 
+                Ejemplo historial 1: 
                 - Últimos mensajes del historial:
-                    - Quiero reservar para hoy.
-                    - Estas son las horas disponibles: 12:00, 13:00.
-                    - a las 12 entonces.
-                    - Necesito que me proporciones un nombre.
-                    - alejandro.
+                    - Usuario: Quiero reservar para hoy.
+                    - Sistema: Estas son las horas disponibles: 12:00, 13:00.
+                    - Usuario: a las 12 entonces.
+                    - Sistema: Necesito que me proporciones un nombre.
+                    - Usuario: alejandro.
                     -> [
                     {{"intencion": "hacer_reserva", "detalle": "hoy a las 12 nombre alejandro"}},
                   ]
 
+                Ejemplo historial 2: 
+                - Últimos mensajes del historial:
+                    - Usuario: Quiero eliminar mi reserva.
+                    - Sistema: ¿Podrías proporcionarme la fecha de tu reserva?
+                    - Usuario: mañana
+                    - Sistema: ¿A qué nombre está hecha su reserva?
+                    - Usuario: alejandro.
+                    -> [
+                    {{"intencion": "eliminar_reserva", "detalle": "mañana nombre alejandro"}},
+                  ]
+
                 Ejemplo 1:
-                - "Quiero saber el menú, reservar, saber la música que se va a pinchar y cuánta gente va a haber el domingo que viene" -> 
+                - Mensaje: "Quiero saber el menú, reservar, saber la música que se va a pinchar y cuánta gente va a haber el domingo que viene" -> Respuesta esperada:
                   [
                     {{"intencion": "info_menu", "detalle": "El domingo que viene"}},
                     {{"intencion": "hacer_reserva", "detalle": "El domingo que viene"}},
@@ -155,29 +166,29 @@ def detectar_intenciones(text, historial):
                     {{"intencion": "saber_gente", "detalle": "El domingo que viene"}}
                   ]
                 Ejemplo 2:
-                - "Quiero eliminar una reserva y poner una reclamación" -> 
+                - Mensaje: "Quiero eliminar una reserva y poner una reclamación" -> Respuesta esperada:
                   [
                     {{"intencion": "eliminar_reserva", "detalle": ""}},
                     {{"intencion": "poner_reclamación", "detalle": ""}},
                   ]
                 Ejemplo 3:
-                - "Hola que tal, quiero saber la disponibilidad para reservar que tenéis para mañana." -> 
+                - Mensaje: "Hola que tal, quiero saber la disponibilidad para reservar que tenéis para mañana." -> Respuesta esperada:
                   [
                     {{"intencion": "saludar", "detalle": "Hola, que tal"}},
                     {{"intencion": "info_reservas", "detalle": "para mañana"}},
                   ]
                 Ejemplo 4:
-                - "Hasta luego" -> 
+                - Mensaje: "Hasta luego" -> Respuesta esperada:
                   [
                     {{"intencion": "despedir", "detalle": "Hasta luego"}},
                   ]
                 Ejemplo 5:
-                - "Gracias" -> 
+                - Mensaje: "Gracias" -> Respuesta esperada:
                   [
                     {{"intencion": "agradecer", "detalle": "Gracias"}},
                   ]
                 Ejemplo 6:
-                - "Quiero saber la disponibilidad para reservar mañana" -> 
+                - Mensaje: "Quiero saber la disponibilidad para reservar mañana" -> Respuesta esperada:
                   [
                     {{"intencion": "info_reservas", "detalle": "para mañana"}},
                   ]

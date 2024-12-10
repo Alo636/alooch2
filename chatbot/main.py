@@ -36,6 +36,7 @@ def pregunta_respuesta(prompt, history):
 
         if function_name in funciones_disponibles:
             response = funciones_disponibles[function_name](**parameters)
+            print(response)
             respuesta_openai = generar_respuesta_con_openai(
                 response, conversation_history, elegir_instruccion(function_name))
             return respuesta_openai
@@ -53,7 +54,3 @@ while user_prompt != ".":
         print(pregunta_respuesta(intencion, conversation_history))
 
     user_prompt = input()
-
-perro = "perrete"
-print(perro)
-#eskerepupupum
