@@ -13,7 +13,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 conversation_history = [
 ]
-
 max_tokens = 4096
 
 
@@ -30,6 +29,7 @@ def pregunta_respuesta(prompt, history):
     output = procesar_respuesta_openai(
         history, prompt)
     print(output)
+
     if hasattr(output, 'function_call'):
         function_name = output.function_call.name
         parameters = json.loads(output.function_call.arguments)
@@ -50,6 +50,7 @@ while user_prompt != ".":
     intenciones = detectar_intenciones(user_prompt, conversation_history)
 
     print(intenciones)
+
     for intencion in intenciones:
         print(pregunta_respuesta(intencion, conversation_history))
 

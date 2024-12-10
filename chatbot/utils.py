@@ -27,7 +27,9 @@ def elegir_instruccion(function):
         1. Si la data es una string "Fecha no recibida", quiero que le preguntes al usuario para cuándo sería la reserva.
         2. Si la data es una string "Hora no dispobible", quiero que le informes al usuario que esa hora no está disponible para reservar.
         3. Si la data es una string "Hora no recibida", quiero que pidas al usuario qué hora querría hacer la reserva.
-        4. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario a qué nombre querría hacer la reserva.
+        4. Si la data es un dict con la fecha y un valor que dice 'Todo ocupado', quiero que informes al usuario que esa hora está ocupada.
+        5. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario a qué nombre querría hacer la reserva.
+
         En caso de que la data no sea ninguna de las anteriores sigue estos pasos:
         1. Confirma al usuario si la reserva se ha realizado o no viendo el argumento Reserva.
         2. Si la reserva se ha completado, incluye en tu respuesta los detalles de la misma.
@@ -136,12 +138,13 @@ def instrucciones_segun_intencion(prompt):
 
         Por favor, procesa los argumentos siguiendo estas reglas:
 
-        1. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
-        2. Las fechas deben estar en formato datetime: YYYY-MM-DD.
-        3. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
+        1. Si no se especifican las fechas o las horas, establece estos argumentos como None.
+        2. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
+        3. Las fechas deben estar en formato datetime: YYYY-MM-DD.
+        4. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
         Ajusta automáticamente el mes y el año si es necesario.
-        4. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-        5. Si no se especifican las fechas o las horas, establece estos argumentos como None.
+        5. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
+
 
         Sigue estas reglas de forma estricta para procesar correctamente los datos.
         Ejemplos si hoy fuese 10 de diciembre:
@@ -151,20 +154,22 @@ def instrucciones_segun_intencion(prompt):
         """,
 
         "info_menu":
-        """Quiero que tomes los argumentos valorando los detalles.
-        En caso de que no se especifique la fecha, tómala como argumento None.""",
+        f"""Quiero que tomes los argumentos valorando los detalles.
+        En caso de que no se especifique la fecha, tómala como argumento None.
+        Ten en cuenta que hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
+        """,
 
         "hacer_reserva": f"""
         Primero, ten en cuenta que hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
 
         Por favor, procesa los argumentos siguiendo estas reglas:
 
-        1. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
-        2. Las fechas deben estar en formato datetime: YYYY-MM-DD.
-        3. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
+        1. Si no se especifican las horas, la fecha o el nombre, establece estos argumentos como None.
+        2. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
+        3. Las fechas deben estar en formato datetime: YYYY-MM-DD.
+        4. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
         Ajusta automáticamente el mes y el año si es necesario.
-        4. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-        5. Si no se especifican las horas, la fecha o el nombre, establece estos argumentos como None.
+        5. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
 
         Sigue estas reglas de forma estricta para procesar correctamente los datos.
         """,
@@ -174,12 +179,13 @@ def instrucciones_segun_intencion(prompt):
 
         Por favor, procesa los argumentos siguiendo estas reglas:
 
-        1. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
-        2. Las fechas deben estar en formato datetime: YYYY-MM-DD.
-        3. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
+        1. Si no se especifican las horas, la fecha o el nombre, establece estos argumentos como None.
+        2. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
+        3. Las fechas deben estar en formato datetime: YYYY-MM-DD.
+        4. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
         Ajusta automáticamente el mes y el año si es necesario.
-        4. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-        5. Si no se especifican las horas, la fecha o el nombre, establece estos argumentos como None.
+        5. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
+        
 
         Sigue estas reglas de forma estricta para procesar correctamente los datos.
         """,

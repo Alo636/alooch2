@@ -45,6 +45,7 @@ def info_reservas(fechas=None, horas=None):
     rangos = []
     for fecha, hora in fechas_horas:
         conversion = conversion_a_rango(fecha, hora)
+
         if conversion == {"error": "Hora no disponible"}:
             return "Hora no disponible"
         rangos.append(conversion)
@@ -75,7 +76,8 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
 
     disponibilidad = info_reservas(
         fecha, [hora])
-    if disponibilidad == "Hora no disponible":
+
+    if disponibilidad == "Hora no disponible" or disponibilidad == {f'{fecha}': 'Todo ocupado'}:
         return disponibilidad
 
     if nombre is None:

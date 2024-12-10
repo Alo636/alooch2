@@ -154,7 +154,7 @@ def detectar_intenciones(text, historial):
                     - Sistema: ¿A qué nombre está hecha su reserva?
                     - Usuario: alejandro.
                     -> [
-                    {{"intencion": "eliminar_reserva", "detalle": "mañana nombre alejandro"}},
+                    {{"intencion": "eliminar_reserva", "detalle": "mañana, nombre alejandro"}},
                   ]
 
                 Ejemplo 1:
@@ -172,7 +172,7 @@ def detectar_intenciones(text, historial):
                     {{"intencion": "poner_reclamación", "detalle": ""}},
                   ]
                 Ejemplo 3:
-                - Mensaje: "Hola que tal, quiero saber la disponibilidad para reservar que tenéis para mañana." -> Respuesta esperada:
+                - Mensaje: "Hola que tal, quiero saber la disponibilidad que tenéis para mañana." -> Respuesta esperada:
                   [
                     {{"intencion": "saludar", "detalle": "Hola, que tal"}},
                     {{"intencion": "info_reservas", "detalle": "para mañana"}},
@@ -205,6 +205,7 @@ def detectar_intenciones(text, historial):
     )
 
     # Extraer y retornar las intenciones como JSON
+    print(response.choices[0].message.content)
     intentions = json.loads(response.choices[0].message.content)
     return intentions
 
