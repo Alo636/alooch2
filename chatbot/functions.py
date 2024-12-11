@@ -4,7 +4,8 @@ import os
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
-from chatbot.utils import conversion_a_rango, extraer_fecha_de_string, filtrar_dias_libres
+from collections import defaultdict
+from chatbot.utils import conversion_a_rango, extraer_fecha_de_string
 
 load_dotenv()
 
@@ -26,10 +27,8 @@ def info_reservas(fechas=None, horas=None):
     Consulta la disponibilidad para un conjunto específico de fechas y horas.
     Las fechas deben ser proporcionadas como una cadena separada por comas.
     """
-    if fechas == None:
+    if fechas is None:
         return "Fechas no recibidas"
-
-    disponibilidad = {}
 
     # pylint: disable=no-member
     sheet = service.spreadsheets()
@@ -37,8 +36,10 @@ def info_reservas(fechas=None, horas=None):
     fechas = [extraer_fecha_de_string(fecha.strip())
               for fecha in fechas.split(",")]
 
-    if horas == None:
+    if horas is None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
+    else:
+        horas = [hora.strip() for hora in horas.split(",")]
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
 
@@ -56,12 +57,18 @@ def info_reservas(fechas=None, horas=None):
     ).execute()
 
     valores = result.get('valueRanges', [])
+    disponibilidad_por_dia = defaultdict(list)
+
     for idx, (fecha, hora) in enumerate(fechas_horas):
         valores_rango = valores[idx].get('values', [])
-        clave = f"{fecha.strftime('%Y-%m-%d')} {hora}"
-        disponibilidad[clave] = "Libre" if not valores_rango else valores_rango[0][0]
-    dias_libres = filtrar_dias_libres(disponibilidad)
-    return dias_libres
+        if not valores_rango:  # Si no hay valores, se considera "Libre"
+            clave = fecha.strftime('%Y-%m-%d')
+            disponibilidad_por_dia[clave].append(hora)
+
+    # Convertir el defaultdict a un dict normal para el resultado final
+    disponibilidad_por_dia = dict(disponibilidad_por_dia)
+    print(disponibilidad_por_dia)
+    return disponibilidad_por_dia
 
 
 def hacer_reserva(fecha=None, hora=None, nombre=None):

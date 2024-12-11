@@ -205,7 +205,6 @@ def detectar_intenciones(text, historial):
     )
 
     # Extraer y retornar las intenciones como JSON
-    print(response.choices[0].message.content)
     intentions = json.loads(response.choices[0].message.content)
     return intentions
 

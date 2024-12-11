@@ -22,17 +22,18 @@ function_descriptions_multiple = [
             "properties": {
                 "fechas": {
                     "type": ["string", "null"],
-                    "description": "La fecha de la reserva en formato YYYY-MM-DD.",
+                    "description": "Lista de fechas de la reserva en formato YYYY-MM-DD. Tiene que ser una cadena separada por comas.",
+                    "items": {"type": "string"},
                 },
                 "horas": {
                     "type": ["string", "null"],
-                    "description": "La hora de la reserva en formato HH:MM.",
+                    "description": "Lista de horas de la reserva en formato HH:MM. Tiene que ser una cadena separada por comas.",
+                    "items": {"type": "string"},
                 },
             },
             "required": [],
         },
     },
-
     {
         "name": "hacer_reserva",
         "description": "La intención es hacer una reserva.",

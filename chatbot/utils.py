@@ -2,7 +2,6 @@
 disque
 """
 from datetime import datetime
-from collections import defaultdict
 
 
 def elegir_instruccion(function):
@@ -105,27 +104,6 @@ def extraer_fecha_de_string(fecha):
     date = datetime(agno, mes, dia)
 
     return date
-
-
-def filtrar_dias_libres(data):
-    resultado = {}
-
-    # Agrupar las claves por día
-    horarios_por_dia = defaultdict(dict)
-    for fecha_hora, estado in data.items():
-        dia, hora = fecha_hora.split()
-        horarios_por_dia[dia][hora] = estado
-
-    # Procesar cada día
-    for dia, horas in horarios_por_dia.items():
-        libres = [f"{dia} {hora}" for hora,
-                  estado in horas.items() if estado == "Libre"]
-        if libres:
-            resultado[dia] = libres
-        else:
-            resultado[dia] = "Todo ocupado"
-
-    return resultado
 
 
 def instrucciones_segun_intencion(prompt):
