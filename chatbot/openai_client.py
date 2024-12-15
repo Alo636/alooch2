@@ -23,6 +23,49 @@ intenciones = ["hacer una reserva", "eliminar una reserva", "informarse sobre re
                "informarse sobre el menú", "saludar", "agradecer", "despedirse"]
 
 
+def llamar_api_openai(conversation_history, functions=None, function_call="auto", model="gpt-4o-mini", temperature=0):
+    """
+    Llama a la API de OpenAI para generar una respuesta a partir del historial de conversación dado.
+
+    Args:
+        conversation_history (list): Lista de mensajes en el formato [{ "role": "user"|"assistant"|"system"|"function", "content": str, "name": Optional[str] }, ...].
+        functions (list): Lista de funciones disponibles en el formato requerido por la API.
+        function_call (str|dict): Puede ser:
+            - "auto": Permite al modelo decidir si llama o no una función.
+            - "none": Evita que el modelo llame funciones.
+            - {"name": "nombre_de_funcion"}: Le indica al modelo que llame a esa función en particular.
+        model (str): El modelo a utilizar, por defecto "gpt-4".
+        temperature (float): Control de aleatoriedad. Por defecto 0.
+
+    Returns:
+        response_message: Un objeto con atributos .content y .function_call (si existe).
+    """
+
+    # Preparamos los argumentos para la llamada
+    # El parámetro function_call se pasa de acuerdo con la documentación de OpenAI.
+    # - Si es "auto" o "none", se pasa tal cual.
+    # - Si es un dict con {"name": ...}, se pasa también directamente.
+    request_params = {
+        "model": model,
+        "messages": conversation_history,
+        "temperature": temperature,
+    }
+
+    if functions is not None:
+        request_params["functions"] = function_descriptions_multiple
+
+    if function_call is not None:
+        request_params["function_call"] = function_call
+
+    # Llamada a la API de OpenAI
+    response = client.chat.completions.create(**request_params)
+
+    # Extraemos el primer mensaje (asumiendo que siempre hay al menos una respuesta)
+    message = response.choices[0].message
+
+    return message
+
+
 def procesar_respuesta_openai(historial, prompt):
 
     instrucciones = instrucciones_segun_intencion(prompt)

@@ -36,10 +36,12 @@ def info_reservas(fechas=None, horas=None):
     fechas = [extraer_fecha_de_string(fecha.strip())
               for fecha in fechas.split(",")]
 
+    print(type(horas))
+
     if horas is None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
     else:
-        horas = [hora.strip() for hora in horas.split(",")]
+        horas = [horas]
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
 
@@ -67,7 +69,6 @@ def info_reservas(fechas=None, horas=None):
 
     # Convertir el defaultdict a un dict normal para el resultado final
     disponibilidad_por_dia = dict(disponibilidad_por_dia)
-    print(disponibilidad_por_dia)
     return disponibilidad_por_dia
 
 
@@ -83,6 +84,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
 
     disponibilidad = info_reservas(
         fecha, [hora])
+    print(disponibilidad)
 
     if disponibilidad == "Hora no disponible" or disponibilidad == {f'{fecha}': 'Todo ocupado'}:
         return disponibilidad
@@ -120,6 +122,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
         "nombre": nombre,
         "Reserva": reserva_estado
     }
+    print(info)
 
     return {key: info}
 
