@@ -1,5 +1,4 @@
-from datetime import datetime
 
-hoy = datetime.now()
-
-print(hoy.year)
+frase = "Hola"
+frase = frase.split(",")
+print(frase)

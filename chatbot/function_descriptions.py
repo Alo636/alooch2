@@ -16,7 +16,7 @@ function_descriptions_multiple = [
     },
     {
         "name": "info_reservas",
-        "description": "La intención es obtener información sobre la disponibilidad de reservas.",
+        "description": "Obtener información sobre la disponibilidad de reservas.",
         "parameters": {
             "type": "object",
             "properties": {

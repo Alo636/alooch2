@@ -41,7 +41,7 @@ def info_reservas(fechas=None, horas=None):
     if horas is None:
         horas = ["12:00", "13:00", "14:00", "15:00"]
     else:
-        horas = [horas]
+        horas = horas.split(",")
 
     fechas_horas = [(fecha, hora) for fecha in fechas for hora in horas]
 
@@ -83,7 +83,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
         return info_reservas(fecha, hora)
 
     disponibilidad = info_reservas(
-        fecha, [hora])
+        fecha, hora)
     print(disponibilidad)
 
     if disponibilidad == "Hora no disponible" or disponibilidad == {f'{fecha}': 'Todo ocupado'}:
@@ -94,7 +94,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
 
     fecha_dt = extraer_fecha_de_string(fecha)
     key = f"{fecha_dt.strftime('%Y-%m-%d')}"
-    if disponibilidad.get(key) == [f'{fecha} {hora}']:
+    if disponibilidad.get(key) == [f'{hora}']:
         rangos = []
         conversion = conversion_a_rango(fecha_dt, hora)
         if conversion == {"error": "Hora no disponible"}:
