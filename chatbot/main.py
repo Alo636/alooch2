@@ -14,7 +14,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 hoy = datetime.now()
 
 
-conversations_history = [{"role": "system", "content": "Eres un asistente de restaurante cordial."},
+conversations_history = [{"role": "system", "content": "Eres un asistente de restaurante cordial. Saluda solo una vez al inicio de la conversación y no repitas saludos innecesariamente. "},
+                         {"role": "system", "content": "Si el usuario responde con 'vale', 'ok', 'está bien', u otra confirmación breve tras haberte ofrecido más ayuda, simplemente reconoce su respuesta brevemente y no repitas la invitación."},
                          {"role": "system", "content": f"Hoy es {hoy.day} del {hoy.month} de {hoy.year}. Responde teniendo en cuenta esta fecha."},]
 
 max_tokens = 4096
@@ -34,7 +35,6 @@ def pregunta_respuesta(user_message, conversation_history):
         functions=function_descriptions_multiple,
         function_call="auto"  # Permitimos que el modelo llame funciones si lo requiere
     )
-    print(response)
 
     # Si el modelo ha decidido llamar a una función
     if hasattr(response, 'function_call') and response.function_call is not None:
