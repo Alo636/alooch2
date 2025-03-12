@@ -1,22 +1,18 @@
 """
 disque
 """
-from chatbot.openai_client import summarize_history, llamar_api_openai
-from chatbot.functions import funciones_disponibles
-from chatbot.function_descriptions import function_descriptions_multiple
 import json
 import sys
 import os
-from datetime import datetime
+from chatbot.openai_client import summarize_history, llamar_api_openai
+from chatbot.functions import funciones_disponibles
+from chatbot.function_descriptions import function_descriptions_multiple
+from chatbot.utils import cargar_instrucciones
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-hoy = datetime.now()
 
-
-conversations_history = [{"role": "system", "content": "Eres un asistente de restaurante cordial. Saluda solo una vez al inicio de la conversación y no repitas saludos innecesariamente. "},
-                         {"role": "system", "content": "Si el usuario responde con 'vale', 'ok', 'está bien', u otra confirmación breve tras haberte ofrecido más ayuda, simplemente reconoce su respuesta brevemente y no repitas la invitación."},
-                         {"role": "system", "content": f"Hoy es {hoy.day} del {hoy.month} de {hoy.year}. Responde teniendo en cuenta esta fecha."},]
+conversations_history = cargar_instrucciones()
 
 max_tokens = 4096
 
@@ -52,7 +48,6 @@ def pregunta_respuesta(user_message, conversation_history):
                 "name": function_name,
                 "content": json.dumps(function_result)
             })
-
             # Ahora volvemos a llamar a la API para que el modelo dé su respuesta final al usuario
             final_response = llamar_api_openai(
                 conversation_history,

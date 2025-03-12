@@ -1,57 +1,79 @@
 """
 disque
 """
-from datetime import datetime
+import os
+from datetime import datetime, timedelta
+import mysql.connector
+from dotenv import load_dotenv
+
+load_dotenv()
+
+hoy = datetime.now()
 
 
-def conversion_a_rango(fecha=None, hora=None):
-
-    dia = str(fecha.day)
-    mes = str(fecha.month)
-    agno = str(fecha.year)
-    # Mapeo de horas a columnas
-    horas_a_columnas = {
-        "12:00": "B",
-        "13:00": "C",
-        "14:00": "D",
-        "15:00": "E"
-    }
-
-    # Validar entrada
-    if fecha == None or hora == None:
-        return {"error": "Faltan datos"}
-    # Obtener columna correspondiente o retornar error si la hora no está disponible
-    columna = horas_a_columnas.get(hora)
-    if not columna:
-        return {"error": "Hora no disponible"}
-
-    # Convertir día a fila (suponiendo que es un entero) y construir la referencia
-    fila = str(int(dia) + 1)
-
-    hoja = convertir_numero_a_mes(mes)+agno+"!"
-
-    return f"{hoja}{columna}{fila}"
+def cargar_instrucciones():
+    return [{"role": "system", "content": f"""Eres un asistente de restaurante cordial. Quiero que sigas fielmente estas instrucciones:
+    1- Instrucciones de comportamiento: 
+            - Saluda solo una vez al inicio de la conversación y no repitas saludos innecesariamente.
+            - Hoy es {hoy.day} del {hoy.month} de {hoy.year}. Responde teniendo en cuenta esta fecha.
+            - Si el usuario responde con 'vale', 'ok', 'sí', 'claro', 'de acuerdo' u otra afirmación breve, fijate solo en lo que le habías dicho.
+            - Si no es una fecha válida infórmale directamente. Ejemplo: Lunes 3 de abril de 2025 (el 3 de abril de 2025 cae en jueves).
+    
+    2- Instrucciones de reservas:
+        - Mira la disponibilidad solo si es una fecha valida. En caso contrario avisa al usuario.
+            - Si te hablan para reservar en una fecha, di primero la disponibilidad que hay en esa fecha.
+            - Antes de ofrecer o negar una hora para reservar, asegúrate de que has mirado su disponibilidad.
+            - Si estás hablando de reservas, no hace falta que digas el horario de apertura y cierre.
+    3- Instrucciones de horario:
+        - Mira la disponibilidad solo si es una fecha valida. En caso contrario avisa al usuario.
+            - Si es una fecha válida, mira siempre el horario antes de responder.
+    """}]
 
 
-def convertir_numero_a_mes(mes_numero):
-    # Mapeo de números de mes a nombres de mes
-    meses = {
-        "1": "Enero",
-        "2": "Febrero",
-        "3": "Marzo",
-        "4": "Abril",
-        "5": "Mayo",
-        "6": "Junio",
-        "7": "Julio",
-        "8": "Agosto",
-        "9": "Septiembre",
-        "10": "Octubre",
-        "11": "Noviembre",
-        "12": "Diciembre"
-    }
-    # Retorna el mes correspondiente o "Error" si no existe
-    return meses.get(mes_numero, "Error")
+def validar_fechas(fechas_list, fechas_cerradas):
+    errores = []
+    limite_futuro = hoy + timedelta(days=30)
+
+    for fecha in fechas_list:
+        try:
+            fecha_dt = datetime.strptime(
+                fecha, "%Y-%m-%d")  # Convertir a datetime
+            if fecha_dt > limite_futuro:
+                errores.append(
+                    f"La fecha {fecha} supera el límite de 30 días y no es válida para reservar.")
+            if fecha in fechas_cerradas:
+                errores.append(
+                    f"El restaurante estará cerrado el {fecha}. No es posible reservar en esa fecha.")
+        except ValueError:
+            errores.append(
+                f"Formato de fecha inválido: {fecha}. Debe ser YYYY-MM-DD.")
+
+    if errores:
+        return {"error": errores}
+    return "OK"
 
 
-def extraer_fecha_de_string(fecha: str) -> datetime:
-    return datetime.strptime(fecha.strip(), "%Y-%m-%d")
+def get_connection():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
+    )
+
+
+def obtener_fechas_cerradas():
+    """
+    Consulta la base de datos para obtener las fechas en las que el restaurante no acepta reservas.
+    Retorna una lista de fechas en formato 'YYYY-MM-DD'.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT fecha FROM fechas_no_disponibles"
+    cursor.execute(query)
+    filas = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    # Convertir las fechas a formato de lista
+    return [fila[0].strftime("%Y-%m-%d") for fila in filas]
