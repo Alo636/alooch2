@@ -2,4 +2,4 @@ from datetime import datetime
 
 hoy = datetime.now()
 
-print(hoy.today())
+print(hoy.strftime("%A"))
