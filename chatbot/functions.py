@@ -77,7 +77,7 @@ def get_horario(fechas):
 
                 # 1. Verificar si la fecha está en la lista de fechas cerradas
                 if fecha in fechas_cerradas:
-                    horarios[fecha] = {"estado": "CERRADO"}
+                    horarios[fecha] = {"estado": "cerrado"}
                     continue  # Pasar a la siguiente fecha
 
                 # 2. Buscar horario especial
@@ -111,7 +111,7 @@ def get_horario(fechas):
             except ValueError:
                 horarios[fecha] = {
                     "error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."}
-
+        print(horarios)
         return horarios
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
@@ -123,7 +123,7 @@ def get_horario(fechas):
         conn.close()
 
 
-def hacer_reserva_db(fecha=None, hora=None, nombre=None):
+def hacer_reserva(fecha=None, hora=None, nombre=None):
     """
     Inserta una reserva en la base de datos solo si:
       - La fecha no está en la base de datos de fechas no disponibles.
@@ -149,7 +149,9 @@ def hacer_reserva_db(fecha=None, hora=None, nombre=None):
 
     # **2. Obtener las fechas cerradas desde la base de datos y verificar**
     fechas_cerradas = obtener_fechas_cerradas()
+    print(fechas_cerradas)
     if fecha in fechas_cerradas:
+        print("bingi")
         return {"error": f"El restaurante estará cerrado el {fecha}. No es posible reservar en esa fecha."}
 
     # **3. Validar que la hora sea permitida**
@@ -180,7 +182,7 @@ def hacer_reserva_db(fecha=None, hora=None, nombre=None):
         return {"error": str(e)}
 
 
-def info_reservas_db(fechas=None, horas=None):
+def info_reservas(fechas=None, horas=None):
     if not fechas:
         return {"error": "Fechas no recibidas"}
 
@@ -190,10 +192,12 @@ def info_reservas_db(fechas=None, horas=None):
         fechas_list = fechas
     else:
         return {"error": "Formato de fechas inválido"}
-
+    
+    print(fechas_list)
     fechas_cerradas = obtener_fechas_cerradas()
+    print(fechas_cerradas)
     fechas_validadas = validar_fechas(fechas_list, fechas_cerradas)
-
+    print(fechas_validadas)
     if fechas_validadas != "OK":
         return fechas_validadas
 
@@ -235,11 +239,12 @@ def info_reservas_db(fechas=None, horas=None):
         for h in horas_permitidas:
             disponibilidad[f"{fecha} {h}"] = "Ocupada" if h in ocupadas else "Libre"
         respuesta.update(disponibilidad)
-
+    
+    print(respuesta)
     return respuesta
 
 
-def eliminar_reserva_db(fecha=None, hora=None, nombre=None):
+def eliminar_reserva(fecha=None, hora=None, nombre=None):
     """
     Elimina una reserva existente que coincida con fecha, hora y nombre.
     Retorna un mensaje de éxito o de error si no se encontró.
@@ -279,8 +284,8 @@ def eliminar_reserva_db(fecha=None, hora=None, nombre=None):
 
 funciones_disponibles = {
     "get_menu": get_menu,
-    "info_reservas": info_reservas_db,
-    "hacer_reserva": hacer_reserva_db,
-    "eliminar_reserva": eliminar_reserva_db,
+    "info_reservas": info_reservas,
+    "hacer_reserva": hacer_reserva,
+    "eliminar_reserva": eliminar_reserva,
     "get_horario": get_horario,
 }
