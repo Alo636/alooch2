@@ -95,4 +95,8 @@ def summarize_history(historial):
     summary = response.choices[0].message.content
 
     # Devuelve el resumen como un nuevo mensaje del sistema
+<<<<<<< HEAD
     return [{"role": "system", "content": summary}]
+=======
+    return [{"role": "system", "content": summary}]
+>>>>>>> 76abb27baa72ecf677c923ac7d1c225ce9793dff
