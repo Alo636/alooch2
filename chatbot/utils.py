@@ -1,203 +1,78 @@
 """
 disque
 """
-from datetime import datetime
-from collections import defaultdict
+import os
+from datetime import datetime, timedelta
+import mysql.connector
+from dotenv import load_dotenv
+
+load_dotenv()
+
+hoy = datetime.now()
 
 
-def elegir_instruccion(function):
-    if function == "info_menu":
-        return """
-        Quiero que informes sobre el menú del día solicitado.
-        Si recibes "Fecha no recibida", pide al usuario que te facilite la fecha.
-
-"""
-    elif function == "info_reservas":
-        return """
-        Sigue estos pasos:
-        1. Las horas que te llegan son las horas que hay libres.
-        2. Si obtienes una string "Fechas no recibidas" pide al usuario que te facilite la fecha por la que quiere preguntar.
-        3. Si obtienes una string "Hora no disponible" informa al usuario sobre que esa hora no está disponible.
-        4. Informa sobre las horas libres que hay.
-        5. Si no hay ninguna hora libre, infórmalo sin dar detalles de las reservas.
-"""
-    elif function == "hacer_reserva":
-        return """
-        Sigue estos pasos:
-        1. Si la data es una string "Fecha no recibida", quiero que le preguntes al usuario para cuándo sería la reserva.
-        2. Si la data es una string "Hora no dispobible", quiero que le informes al usuario que esa hora no está disponible para reservar.
-        3. Si la data es una string "Hora no recibida", quiero que pidas al usuario qué hora querría hacer la reserva.
-        4. Si la data es un dict con la fecha y un valor que dice 'Todo ocupado', quiero que informes al usuario que esa hora está ocupada.
-        5. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario a qué nombre querría hacer la reserva.
-
-        En caso de que la data no sea ninguna de las anteriores sigue estos pasos:
-        1. Confirma al usuario si la reserva se ha realizado o no viendo el argumento Reserva.
-        2. Si la reserva se ha completado, incluye en tu respuesta los detalles de la misma.
-        """
-    elif function == "eliminar_reserva":
-        return """
-        IMPORTANTE: No le digas al usuario la información que recibes.
-        Sigue estos pasos:
-        1. Si la data es una string "Fecha no recibida", quiero que le preguntes al usuario la fecha de su reserva.
-        2. Si la data es una string "Nombre no recibido", quiero que preguntes al usuario a qué nombre está hecha su reserva.
-        3. Si la data es una string "Hora erronea", quiero que informes al usuario de que ha proporcionado una hora erronea.
-        En caso de que la data no sea ninguna de las anteriores:
-        Informa al usuario de que su reserva se ha eliminado.
-        """
-    return ""
+def cargar_instrucciones():
+    return [{"role": "system", "content": f"""Eres un asistente de restaurante cordial. Quiero que sigas fielmente estas instrucciones:
+    1- Instrucciones de comportamiento: 
+            - Saluda solo una vez al inicio de la conversación y no repitas saludos innecesariamente.
+            - Hoy es {hoy.strftime("%A")}, {hoy.day} del {hoy.month} de {hoy.year}. Responde teniendo en cuenta esta fecha.
+            - Si el usuario responde con 'vale', 'ok', 'sí', 'claro', 'de acuerdo' u otra afirmación breve, tómalos como confirmación.
+    
+    2- Instrucciones de reservas, Pasos a seguir:
+        - Si te hablan para reservar en una fecha, di primero la disponibilidad que hay en esa fecha.
+        - Antes de ofrecer o negar una hora para reservar, asegúrate de que has mirado su disponibilidad.
+        - Si estás hablando de reservas, no hace falta que digas el horario de apertura y cierre.
+        - Cuando vayas a responder quiero que tus palabras tengan lógica. No digas fechas no válidas. Ejemplo: "Lunes 3 de abril de 2025" está mal, porque el 03-04-2025 cae en jueves.
+    3- Instrucciones de horario, Pasos a seguir:
+        - Si es una fecha válida, mira siempre el horario antes de responder. 
+        - Responde fechas válidas teniendo en cuenta el día que es hoy. Ejemplo: "Lunes 3 de abril de 2025" está mal, porque es un "Jueves".
+    """}]
 
 
-def conversion_a_rango(fecha=None, hora=None):
+def validar_fechas(fechas_list, fechas_cerradas):
+    errores = []
+    limite_futuro = hoy + timedelta(days=30)
 
-    dia = str(fecha.day)
-    mes = str(fecha.month)
-    agno = str(fecha.year)
-    # Mapeo de horas a columnas
-    horas_a_columnas = {
-        "12:00": "B",
-        "13:00": "C",
-        "14:00": "D",
-        "15:00": "E"
-    }
+    for fecha in fechas_list:
+        try:
+            fecha_dt = datetime.strptime(
+                fecha, "%Y-%m-%d")  # Convertir a datetime
+            if fecha_dt > limite_futuro:
+                errores.append(
+                    f"La fecha {fecha} supera el límite de 30 días y no es válida para reservar.")
+            if fecha in fechas_cerradas:
+                errores.append(
+                    f"El restaurante estará cerrado el {fecha}. No es posible reservar en esa fecha.")
+        except ValueError:
+            errores.append(
+                f"Formato de fecha inválido: {fecha}. Debe ser YYYY-MM-DD.")
 
-    # Validar entrada
-    if fecha == None or hora == None:
-        return {"error": "Faltan datos"}
-    # Obtener columna correspondiente o retornar error si la hora no está disponible
-    columna = horas_a_columnas.get(hora)
-    if not columna:
-        return {"error": "Hora no disponible"}
-
-    # Convertir día a fila (suponiendo que es un entero) y construir la referencia
-    fila = str(int(dia) + 1)
-
-    hoja = convertir_numero_a_mes(mes)+agno+"!"
-
-    return f"{hoja}{columna}{fila}"
+    if errores:
+        return {"error": errores}
+    return "OK"
 
 
-def convertir_numero_a_mes(mes_numero):
-    # Mapeo de números de mes a nombres de mes
-    meses = {
-        "1": "Enero",
-        "2": "Febrero",
-        "3": "Marzo",
-        "4": "Abril",
-        "5": "Mayo",
-        "6": "Junio",
-        "7": "Julio",
-        "8": "Agosto",
-        "9": "Septiembre",
-        "10": "Octubre",
-        "11": "Noviembre",
-        "12": "Diciembre"
-    }
-    # Retorna el mes correspondiente o "Error" si no existe
-    return meses.get(mes_numero, "Error")
+def get_connection():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
+    )
 
 
-def extraer_fecha_de_string(fecha):
-    fecha_tansformed = fecha.strip("")
-    fecha_tansformed = fecha_tansformed.split('-')
-    agno = int(fecha_tansformed[0])
-    mes = int(fecha_tansformed[1])
-    dia = int(fecha_tansformed[2])
-    date = datetime(agno, mes, dia)
+def obtener_fechas_cerradas():
+    """
+    Consulta la base de datos para obtener las fechas en las que el restaurante no acepta reservas.
+    Retorna una lista de fechas en formato 'YYYY-MM-DD'.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = "SELECT fecha FROM fechas_no_disponibles"
+    cursor.execute(query)
+    filas = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
-    return date
-
-
-def filtrar_dias_libres(data):
-    resultado = {}
-
-    # Agrupar las claves por día
-    horarios_por_dia = defaultdict(dict)
-    for fecha_hora, estado in data.items():
-        dia, hora = fecha_hora.split()
-        horarios_por_dia[dia][hora] = estado
-
-    # Procesar cada día
-    for dia, horas in horarios_por_dia.items():
-        libres = [f"{dia} {hora}" for hora,
-                  estado in horas.items() if estado == "Libre"]
-        if libres:
-            resultado[dia] = libres
-        else:
-            resultado[dia] = "Todo ocupado"
-
-    return resultado
-
-
-def instrucciones_segun_intencion(prompt):
-
-    hoy = datetime.now()
-    # Diccionario de intenciones y sus instrucciones asociadas
-    intenciones = {
-        "info_reservas": f"""
-        Primero, ten en cuenta que hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
-
-        Por favor, procesa los argumentos siguiendo estas reglas:
-
-        1. Si no se especifican las fechas o las horas, establece estos argumentos como None.
-        2. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
-        3. Las fechas deben estar en formato datetime: YYYY-MM-DD.
-        4. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
-        Ajusta automáticamente el mes y el año si es necesario.
-        5. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-
-
-        Sigue estas reglas de forma estricta para procesar correctamente los datos.
-        Ejemplos si hoy fuese 10 de diciembre:
-            Ejemplo1: "'intencion': 'info_reservas', 'detalle': 'disponibilidad para reservar'" -> fechas:null, horas:null
-            Ejemplo2: "'intencion': 'info_reservas', 'detalle': 'disponibilidad para reservar mañana'" -> fechas:2024-12-11, horas:null
-            Ejemplo3: "'intencion': 'info_reservas', 'detalle': 'información para reservar pasado mañana a las 12 '" -> fechas:2024-12-12, horas:12:00
-        """,
-
-        "info_menu":
-        f"""Quiero que tomes los argumentos valorando los detalles.
-        En caso de que no se especifique la fecha, tómala como argumento None.
-        Ten en cuenta que hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
-        """,
-
-        "hacer_reserva": f"""
-        Primero, ten en cuenta que hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
-
-        Por favor, procesa los argumentos siguiendo estas reglas:
-
-        1. Si no se especifican las horas, la fecha o el nombre, establece estos argumentos como None.
-        2. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
-        3. Las fechas deben estar en formato datetime: YYYY-MM-DD.
-        4. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
-        Ajusta automáticamente el mes y el año si es necesario.
-        5. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-
-        Sigue estas reglas de forma estricta para procesar correctamente los datos.
-        """,
-
-        "eliminar_reserva": f"""
-        Primero, ten en cuenta que hoy es {str(hoy.strftime('%d-%m-%Y'))} ({str(hoy.strftime('%A'))}).
-
-        Por favor, procesa los argumentos siguiendo estas reglas:
-
-        1. Si no se especifican las horas, la fecha o el nombre, establece estos argumentos como None.
-        2. Los meses deben interpretarse como números (enero = 1, febrero = 2, ..., diciembre = 12).
-        3. Las fechas deben estar en formato datetime: YYYY-MM-DD.
-        4. Si se menciona un día, asume que se refiere al próximo día futuro, no a uno pasado. 
-        Ajusta automáticamente el mes y el año si es necesario.
-        5. Si se menciona un día anterior al actual con una fecha específica, ajusta automáticamente el mes o el año para que corresponda al futuro.
-        
-
-        Sigue estas reglas de forma estricta para procesar correctamente los datos.
-        """,
-
-    }
-
-    # Obtener la intención desde el prompt
-    intencion = prompt.get("intencion")
-
-    # Buscar las instrucciones asociadas o devolver un error
-    instrucciones = intenciones.get(
-        intencion, "error en la identificación de instrucciones")
-
-    # Resultado
-    return instrucciones
+    # Convertir las fechas a formato de lista
+    return [fila[0].strftime("%Y-%m-%d") for fila in filas]

@@ -1,57 +1,67 @@
 """
 disque
 """
-from chatbot.openai_client import procesar_respuesta_openai, generar_respuesta_con_openai, detectar_intenciones, responde_sin_funcion, summarize_history
-from chatbot.utils import elegir_instruccion
-from chatbot.functions import funciones_disponibles
-from chatbot.function_descriptions import function_descriptions_multiple
 import json
 import sys
 import os
+from chatbot.openai_client import summarize_history, llamar_api_openai
+from chatbot.functions import funciones_disponibles
+from chatbot.function_descriptions import function_descriptions_multiple
+from chatbot.utils import cargar_instrucciones
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-conversation_history = [
-]
+
+conversations_history = cargar_instrucciones()
+
 max_tokens = 4096
 
 
-def pregunta_respuesta(prompt, history):
+def pregunta_respuesta(user_message, conversation_history):
+    # Si el historial es muy largo, lo resumimos
+    if len(str(conversation_history)) > max_tokens:
+        conversation_history = summarize_history(conversation_history)
 
-    if len(str(history)) > max_tokens:
-        history = summarize_history(history)
+    # Añadimos el mensaje del usuario al historial
+    conversation_history.append({"role": "user", "content": user_message})
 
-    data_texto = str(prompt).strip("{").strip("}")
+    # Primera llamada al modelo con las funciones disponibles
+    response = llamar_api_openai(
+        conversation_history,
+        functions=function_descriptions_multiple,
+        function_call="auto"  # Permitimos que el modelo llame funciones si lo requiere
+    )
 
-    if prompt.get("intencion") not in [func["name"] for func in function_descriptions_multiple]:
-        return responde_sin_funcion(data_texto)
+    # Si el modelo ha decidido llamar a una función
+    if hasattr(response, 'function_call') and response.function_call is not None:
+        function_name = response.function_call.name
+        parameters = json.loads(response.function_call.arguments)
 
-    output = procesar_respuesta_openai(
-        history, prompt)
-    print(output)
-
-    if hasattr(output, 'function_call'):
-        function_name = output.function_call.name
-        parameters = json.loads(output.function_call.arguments)
-
+        # Ejecutamos la función correspondiente
         if function_name in funciones_disponibles:
-            response = funciones_disponibles[function_name](**parameters)
-            print(response)
-            respuesta_openai = generar_respuesta_con_openai(
-                response, conversation_history, elegir_instruccion(function_name))
-            return respuesta_openai
+            function_result = funciones_disponibles[function_name](
+                **parameters)
 
-    return output.content if output.content is not None else "No se obtuvo respuesta."
+            # Añadimos el resultado de la función como un mensaje del asistente (rol function)
+            conversation_history.append({
+                "role": "assistant",
+                "name": function_name,
+                "content": json.dumps(function_result)
+            })
+            # Ahora volvemos a llamar a la API para que el modelo dé su respuesta final al usuario
+            final_response = llamar_api_openai(
+                conversation_history,
+                functions=function_descriptions_multiple,
+                function_call="none"  # Esta vez no queremos que llame otra función; debe resolver
+            )
+            return final_response.content
+
+    # Si no hay function_call, el modelo ya dio una respuesta directa
+    return response.content if response.content else "No se obtuvo respuesta."
 
 
 user_prompt = input()
 
 while user_prompt != ".":
-    intenciones = detectar_intenciones(user_prompt, conversation_history)
-
-    print(intenciones)
-
-    for intencion in intenciones:
-        print(pregunta_respuesta(intencion, conversation_history))
-
+    print(pregunta_respuesta(user_prompt, conversations_history))
     user_prompt = input()
