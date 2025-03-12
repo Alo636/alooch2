@@ -2,6 +2,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from chatbot.function_descriptions import function_descriptions_multiple
+from datetime import datetime
 
 load_dotenv()
 
@@ -10,6 +11,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("La clave OPENAI_API_KEY no está configurada")
 
+hoy = datetime.now()
 
 client = OpenAI(
     # Defaults to os.environ.get("OPENAI_API_KEY")
@@ -59,9 +61,23 @@ def llamar_api_openai(conversation_history, functions=None, function_call="auto"
     response = client.chat.completions.create(**request_params)
 
     # Extraemos el primer mensaje (asumiendo que siempre hay al menos una respuesta)
-    message = response.choices[0].message
+    return response.choices[0].message
 
-    return message
+
+def revisador(mensaje):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "system", "content": f"""
+        Instrucciones:
+                1- Quiero que revises que las fechas y la frase tienen sentido. En caso afirmativo devuelve la frase tal cual. En caso negativo corrígelo.
+                2- Ten en cuenta que hoy es {hoy.strftime("%A")}, {hoy.day} del {hoy.month} de {hoy.year}.
+                3- NO devuelvas tus razonamientos, solo la frase corregida o tal cual.
+        """},
+                  {"role": "user", "content": mensaje}],
+        temperature=0,
+        functions=None
+    )
+    return response.choices[0].message
 
 
 def summarize_history(historial):
