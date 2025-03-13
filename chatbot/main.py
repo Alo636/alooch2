@@ -38,7 +38,6 @@ def pregunta_respuesta(user_message, conversation_history_start, conversation_hi
     # Si el modelo ha decidido llamar a una función
     if hasattr(response, 'function_call') and response.function_call is not None:
         function_name = response.function_call.name
-        print(function_name)
         parameters = json.loads(response.function_call.arguments)
 
         # Ejecutamos la función correspondiente

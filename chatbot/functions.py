@@ -111,7 +111,7 @@ def get_horario(fechas):
             except ValueError:
                 horarios[fecha] = {
                     "error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."}
-        print(horarios)
+
         return horarios
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
@@ -196,11 +196,9 @@ def info_reservas(fechas=None, horas=None):
     else:
         return {"error": "Formato de fechas inválido"}
     
-    print(fechas_list)
     fechas_cerradas = obtener_fechas_cerradas()
-    print(fechas_cerradas)
     fechas_validadas = validar_fechas(fechas_list, fechas_cerradas)
-    print(fechas_validadas)
+
     if fechas_validadas != "OK":
         return fechas_validadas
 
@@ -242,10 +240,7 @@ def info_reservas(fechas=None, horas=None):
         for h in horas_permitidas:
             disponibilidad[f"{fecha} {h}"] = "Ocupada" if h in ocupadas else "Libre"
         respuesta.update(disponibilidad)
-    
-    print(respuesta)
     return respuesta
-
 
 def eliminar_reserva(fecha=None, hora=None, nombre=None):
     """
