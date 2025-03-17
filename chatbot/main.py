@@ -16,17 +16,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 app = Flask(__name__)
 CORS(app)  # Permite solicitudes desde tu cliente React (evitar error CORS)
 
-
-
 max_tokens = 1500
 
-
 def pregunta_respuesta(user_message, conversation_history):
-    print(conversation_history)
     # Cargar instrucciones iniciales en cada nueva conversación
     conversation_start = cargar_instrucciones_start()
     conversation_end = cargar_instrucciones_end()
-    print(user_message)
+
     # Si el historial es muy largo, lo resumimos
     if len(str(conversation_history)) > max_tokens:
         conversation_history = summarize_history(conversation_history)
@@ -46,7 +42,6 @@ def pregunta_respuesta(user_message, conversation_history):
     )
     # Si el modelo ha decidido llamar a una función
     if hasattr(response, 'function_call') and response.function_call is not None:
-        print("ha entrado")
         function_name = response.function_call.name
         parameters = json.loads(response.function_call.arguments)
 
@@ -81,7 +76,6 @@ def pregunta_respuesta(user_message, conversation_history):
 
     # Si no hay function_call, el modelo ya dio una respuesta directa
     return response.content if response.content else "No se obtuvo respuesta."
-
 
 
 @app.route('/ask', methods=['POST'])

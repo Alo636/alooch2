@@ -51,7 +51,6 @@ def validar_fechas(fechas_list, fechas_cerradas):
         return {"error": errores}
     return "OK"
 
-
 def get_connection():
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),

@@ -112,7 +112,6 @@ def get_horario(fechas):
             except ValueError:
                 horarios[fecha] = {
                     "error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."}
-        print(horarios)
         return horarios
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
@@ -175,7 +174,6 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
         conn.close()
 
         return {"status": "Completada", "reserva_id": reserva_id}
-
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
         logging.error("Error ocurrido en functions.py: %s", str(e))

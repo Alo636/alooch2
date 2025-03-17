@@ -17,12 +17,6 @@ client = OpenAI(
     # Defaults to os.environ.get("OPENAI_API_KEY")
 )
 
-max_tokens = 4096
-
-intenciones = ["hacer una reserva", "eliminar una reserva", "informarse sobre reservas",
-               "informarse sobre el menú", "saludar", "agradecer", "despedirse"]
-
-
 def llamar_api_openai(conversation_history, functions=None, function_call="auto", model="gpt-4o-mini", temperature=0):
     """
     Llama a la API de OpenAI para generar una respuesta a partir del historial de conversación dado.
@@ -62,23 +56,6 @@ def llamar_api_openai(conversation_history, functions=None, function_call="auto"
 
     # Extraemos el primer mensaje (asumiendo que siempre hay al menos una respuesta)
     return response.choices[0].message
-
-
-def revisador(mensaje):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "system", "content": f"""
-        Instrucciones:
-                1- Quiero que revises que las fechas y la frase tienen sentido. En caso afirmativo devuelve la frase tal cual. En caso negativo corrígelo.
-                2- Ten en cuenta que hoy es {hoy.strftime("%A")}, {hoy.day} del {hoy.month} de {hoy.year}.
-                3- NO devuelvas tus razonamientos, solo la frase corregida o tal cual.
-        """},
-                  {"role": "user", "content": mensaje}],
-        temperature=0,
-        functions=None
-    )
-    return response.choices[0].message
-
 
 def summarize_history(historial):
     # Envía el historial a la API para obtener un resumen
