@@ -26,7 +26,8 @@ def cargar_instrucciones_end():
 1-Devuelve la información que haya dado el asistente en el último mensaje del historial de la conversación.
 2-Quiero que no uses nombres de días de la semana, solo fechas en formato DD-MM-YYYY.
 3-Si obtienes un error, lee el error tal cual al usuario, no te bases en el contexto del resto de mensajes.
-4-En caso de que informes sobre una hora libre, quiero que le preguntes si quiere proceder con la reserva.  
+4-En caso de que informes sobre una hora libre, quiero que le preguntes si quiere proceder con la reserva.
+5-Si informas sobre un menú, devuelve el mensaje tal cual.  
     """}]
 
 def validar_fechas(fechas_list, fechas_cerradas):
@@ -78,18 +79,29 @@ def obtener_fechas_cerradas():
 
 def format_menu_response(menu_data):
     """
-    Recibe la respuesta de get_menu y la formatea en un texto con imágenes.
+    Recibe la respuesta de get_menu y la formatea en un texto sin imágenes,
+    pero permite que get_image devuelva imágenes cuando se soliciten explícitamente.
     """
     if not menu_data.get("menu"):
-        return "No hay platillos disponibles para esta fecha."
+        return {"text": "No hay platillos disponibles para esta fecha."}
 
-    respuesta = "🍽️ **Menú del día:**\n\n"
-    
+    respuesta_texto = "🍽️ **Menú del día:**\n\n"
+    menu_items = []
+
     for item in menu_data["menu"]:
-        respuesta += f"🍽️ {item['nombre_platillo']} - {item['descripcion']} - 💰 {item['precio']}€\n"
-        if item.get("imagen_url"):
-            respuesta += f"🖼️ Ver imagen: {item['imagen_url']}\n\n"
+        respuesta_texto += f"🍽️ {item['nombre_platillo']} - {item['descripcion']} - 💰 {item['precio']}€\n\n"
+        menu_items.append({
+            "nombre": item["nombre_platillo"],
+            "descripcion": item["descripcion"],
+            "precio": f"{item['precio']}€"
+        })
 
-    return respuesta
+    respuesta_texto += ". Si quiere ver fotos de alguno de los platos no dude en pedirlo."
+
+    return {
+        "text": respuesta_texto,
+        "menu": menu_items  # No incluir imágenes aquí
+    }
+
 
 

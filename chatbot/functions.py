@@ -10,6 +10,28 @@ load_dotenv()
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+def get_image(plato=None):
+    """
+    Devuelve la URL de la imagen de un plato específico si existe.
+    """
+    if not plato:
+        return {"error": "Debes especificar un nombre de platillo."}
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = "SELECT imagen_url FROM menu_fecha WHERE nombre_platillo = %s LIMIT 1"
+    cursor.execute(query, (plato,))
+    resultado = cursor.fetchone()
+    
+    conn.close()
+
+    if resultado and resultado[0]:
+        return {"imagen_url": resultado[0]}
+    else:
+        return {"error": "No se encontró imagen para este platillo."}
+
+
 def get_contact_info():
     conn = get_connection()
     cursor = conn.cursor()
@@ -286,4 +308,5 @@ funciones_disponibles = {
     "eliminar_reserva": eliminar_reserva,
     "get_horario": get_horario,
     "get_contact_info": get_contact_info,
+    "get_image": get_image,
 }

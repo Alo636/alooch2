@@ -1,6 +1,21 @@
 
 function_descriptions_multiple = [
     {
+    "name": "get_image",
+    "description": "Devuelve la imagen de un platillo específico si está disponible.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "plato": {
+                "type": "string",
+                "description": "Nombre del platillo del que se quiere obtener la imagen."
+            }
+        },
+        "required": ["plato"]
+    }
+    },
+
+    {
     "name": "get_contact_info",
     "description": "Devuelve la información de contacto del restaurante, incluyendo teléfono, email y página web.",
     "parameters": {}
