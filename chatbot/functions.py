@@ -1,6 +1,6 @@
 
 from dotenv import load_dotenv
-from chatbot.utils import get_connection, obtener_fechas_cerradas, validar_fechas
+from chatbot.utils import get_connection, obtener_fechas_cerradas, validar_fechas, format_menu_response
 from datetime import datetime, timedelta
 import logging
 
@@ -10,44 +10,55 @@ load_dotenv()
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+def get_contact_info():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT telefono, email, pagina_web FROM contacto LIMIT 1")
+    resultado = cursor.fetchone()
+    conn.close()
+
+    if resultado:
+        return {
+            "telefono": resultado[0],
+            "email": resultado[1],
+            "pagina_web": resultado[2]
+        }
+    else:
+        return {"error": "Información de contacto no disponible."}
+
 
 def get_menu(fecha=None):
     conn = get_connection()
     cursor = conn.cursor()
 
-    if fecha:
-        query = """
-            SELECT nombre_platillo, descripcion, precio
-            FROM menu_fecha
-            WHERE fecha = %s
-        """
-        cursor.execute(query, (fecha,))
-    else:
-        # Si no se pasa fecha, traemos todo el menú programado
-        query = """
-            SELECT nombre_platillo, descripcion, precio
-            FROM menu_fecha
-        """
-        cursor.execute(query)
-
+    query = """
+        SELECT nombre_platillo, descripcion, precio, imagen_url
+        FROM menu_fecha
+        WHERE fecha = %s
+    """
+    cursor.execute(query, (fecha,))
+    
     rows = cursor.fetchall()
     conn.close()
 
     menu = []
     for row in rows:
-        nombre_platillo, descripcion, precio = row
+        nombre_platillo, descripcion, precio, imagen_url = row
         menu.append({
             "nombre_platillo": nombre_platillo,
             "descripcion": descripcion,
-            "precio": float(precio)
+            "precio": float(precio),
+            "imagen_url": imagen_url
         })
-    return {"menu": menu}
+
+    return format_menu_response({"menu": menu})
+
 
 
 def get_horario(fechas):
     if not fechas:
         return {"error": "Debe proporcionar al menos una fecha o un rango de fechas en formato YYYY-MM-DD."}
-
+    
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -60,16 +71,10 @@ def get_horario(fechas):
 
         # Obtener las fechas cerradas
         fechas_cerradas = obtener_fechas_cerradas()
-
         # Diccionario para almacenar horarios de cada fecha
         horarios = {}
 
         # Mapeo de días en inglés a español para la base de datos
-        dias_traduccion = {
-            "Monday": "Lunes", "Tuesday": "Martes", "Wednesday": "Miércoles",
-            "Thursday": "Jueves", "Friday": "Viernes", "Saturday": "Sábado", "Sunday": "Domingo"
-        }
-
         for fecha in fechas_list:
             try:
                 fecha = str(fecha)  # Asegurar que la fecha sea string
@@ -84,22 +89,18 @@ def get_horario(fechas):
                 query = "SELECT hora_apertura, hora_cierre FROM horario_especial WHERE fecha = %s"
                 cursor.execute(query, (fecha,))
                 resultado = cursor.fetchone()
-
                 if resultado:
                     horarios[fecha] = {
                         "hora_apertura": str(resultado[0]),
                         "hora_cierre": str(resultado[1])
                     }
                     continue  # Pasar a la siguiente fecha
-
                 # 3. Si no hay horario especial, obtener horario normal según el día de la semana
-                dia_semana = dias_traduccion[datetime.strptime(
-                    fecha, "%Y-%m-%d").strftime("%A")]
-
+                dia_semana = datetime.strptime(
+                    fecha, "%Y-%m-%d").strftime("%A")
                 query = "SELECT hora_apertura, hora_cierre FROM horario WHERE dia_semana = %s"
                 cursor.execute(query, (dia_semana,))
                 resultado = cursor.fetchone()
-
                 if resultado:
                     horarios[fecha] = {
                         "hora_apertura": str(resultado[0]),
@@ -111,7 +112,7 @@ def get_horario(fechas):
             except ValueError:
                 horarios[fecha] = {
                     "error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."}
-
+        print(horarios)
         return horarios
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
@@ -286,4 +287,5 @@ funciones_disponibles = {
     "hacer_reserva": hacer_reserva,
     "eliminar_reserva": eliminar_reserva,
     "get_horario": get_horario,
+    "get_contact_info": get_contact_info,
 }

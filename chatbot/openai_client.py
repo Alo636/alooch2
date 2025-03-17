@@ -83,7 +83,7 @@ def revisador(mensaje):
 def summarize_history(historial):
     # Envía el historial a la API para obtener un resumen
     summary_prompt = [
-        {"role": "system", "content": "Resume el siguiente historial de conversación:"},
+        {"role": "system", "content": "Resume el siguiente historial de conversación. Informa de que es un resumen de conversación:"},
         {"role": "user", "content": str(historial)}
     ]
 

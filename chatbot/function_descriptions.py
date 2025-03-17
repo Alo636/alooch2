@@ -1,8 +1,13 @@
 
 function_descriptions_multiple = [
     {
+    "name": "get_contact_info",
+    "description": "Devuelve la información de contacto del restaurante, incluyendo teléfono, email y página web.",
+    "parameters": {}
+    },
+    {
         "name": "get_menu",
-        "description": "Devuelve la lista de platillos disponibles para una fecha específica (YYYY-MM-DD).",
+        "description": "Devuelve la lista de platillos disponibles para una fecha específica (YYYY-MM-DD), incluyendo imágenes.",
         "parameters": {
             "type": "object",
             "properties": {
