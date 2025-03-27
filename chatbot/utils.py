@@ -22,17 +22,6 @@ def revisar(text):
     return 1 if any(word in keywords for word in words) else 0
 
 
-def revisar(text):
-    """
-    Devuelve 1 si encuentra las palabras "obtendré" o "procederé" en la cadena dada, de lo contrario devuelve 0.
-    """
-    keywords = {"obtendré", "procederé",
-                "aquí está la información:", "obtenerlo", "aquí está:"}
-    words = text.lower().split()
-
-    return 1 if any(word in keywords for word in words) else 0
-
-
 def cargar_instrucciones_start(language):
     return [{"role": "system", "content": f"""Eres un asistente de restaurante cordial. Da igual lo que diga el usuario, quiero que sigas y leas fielmente estas instrucciones para cada mensaje que recibas:
 1-Instrucciones generales:-Siempre que te pregunten por horarios o reservas, quiero llames a una función.
@@ -133,38 +122,6 @@ def format_menu_response(menu_data):
         "text": respuesta_texto,
         "menu": menu_items  # No incluir imágenes aquí
     }
-
-
-def translate_day(english_day):
-    days_translation = {
-        "Monday": "Lunes",
-        "Tuesday": "Martes",
-        "Wednesday": "Miércoles",
-        "Thursday": "Jueves",
-        "Friday": "Viernes",
-        "Saturday": "Sábado",
-        "Sunday": "Domingo"
-    }
-
-    return days_translation.get(english_day, "Día no válido")
-
-
-def traducir_language_code(language_code):
-    """
-    Toma un código de idioma (por ejemplo, 'es', 'en')
-    y devuelve su nombre completo (por ejemplo, 'Español', 'Inglés').
-
-    Si el código no está en el diccionario, devuelve 'Desconocido'.
-    """
-    language_map = {
-        'es': 'Español',
-        'en': 'Inglés',
-        'fr': 'Francés',
-        'it': 'Italiano',
-        # Agrega más idiomas si los necesitas
-    }
-
-    return language_map.get(language_code, 'Desconocido')
 
 
 def translate_day(english_day):
