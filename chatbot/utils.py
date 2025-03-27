@@ -32,14 +32,15 @@ def cargar_instrucciones_start(language):
 6-Quiero que respondas en:{traducir_language_code(language)}."""}]
 
 def cargar_instrucciones_end(language):
+    idioma_actual = traducir_language_code(language)
     return [{"role":"system", "content":f"""Eres un asistente de restaurante cordial que informa al usuario de lo que ha devuelto el asistente sin cambiar información. Quiero que sigas fielmente estas instrucciones:
 1-Devuelve la información que haya dado el asistente en el último mensaje del historial de la conversación.
 2--Hoy es {translate_day(hoy.strftime("%A"))}, {hoy.day} del {hoy.month} de {hoy.year}. Ten en cuenta la fecha.
 3-Devuelve siempre fechas en formato DD-MM-YYYY. No uses nombres de días de la semana.
-4-Si obtienes un error, lee el error tal cual al usuario, no te bases en el contexto del resto de mensajes.
+4-Si obtienes un error, lee el error tal cual al usuario en {idioma_actual}, no te bases en el contexto del resto de mensajes.
 5-En caso de que informes sobre una hora libre, quiero que le preguntes si quiere proceder con la reserva.
 6-Si informas sobre un menú, devuelve el mensaje tal cual.
-7-Quiero que respondas en:{traducir_language_code(language)}.  
+7-Quiero que respondas en:{idioma_actual}.  
     """}]
 
 def validar_fechas(fechas_list, fechas_cerradas):
@@ -58,7 +59,7 @@ def validar_fechas(fechas_list, fechas_cerradas):
                     f"El restaurante estará cerrado el {fecha}. No es posible reservar en esa fecha.")
         except ValueError:
             errores.append(
-                f"Formato de fecha inválido: {fecha}. Debe ser YYYY-MM-DD.")
+                f"Fecha no válida: {fecha}.")
 
     if errores:
         return {"error": errores}

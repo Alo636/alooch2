@@ -25,7 +25,6 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
     Ahora recibe un parámetro `language` para poder manejar
     la lógica multilingüe si lo necesitas.
     """
-    print(language)
     # Cargar instrucciones iniciales en cada nueva conversación
     conversation_start = cargar_instrucciones_start(language)
     conversation_end = cargar_instrucciones_end(language)
@@ -84,7 +83,6 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
             })
 
             revision = revisar(final_response.content)
-            print(revision)
             if revision == 1:
                 mensaje_final += pregunta_respuesta(
                     'obten la información',

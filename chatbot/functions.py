@@ -133,7 +133,7 @@ def get_horario(fechas):
 
             except ValueError:
                 horarios[fecha] = {
-                    "error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."}
+                    "error": "Fecha no válida."}
         return horarios
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
