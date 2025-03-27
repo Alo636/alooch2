@@ -10,6 +10,7 @@ load_dotenv()
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 def get_image(plato=None):
     """
     Devuelve la URL de la imagen de un plato específico si existe.
@@ -19,11 +20,11 @@ def get_image(plato=None):
 
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     query = "SELECT imagen_url FROM menu_fecha WHERE nombre_platillo = %s LIMIT 1"
     cursor.execute(query, (plato,))
     resultado = cursor.fetchone()
-    
+
     conn.close()
 
     if resultado and resultado[0]:
@@ -59,7 +60,7 @@ def get_menu(fecha=None):
         WHERE fecha = %s
     """
     cursor.execute(query, (fecha,))
-    
+
     rows = cursor.fetchall()
     conn.close()
 
@@ -76,11 +77,10 @@ def get_menu(fecha=None):
     return format_menu_response({"menu": menu})
 
 
-
 def get_horario(fechas):
     if not fechas:
         return {"error": "Debe proporcionar al menos una fecha o un rango de fechas en formato YYYY-MM-DD."}
-    
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -120,6 +120,7 @@ def get_horario(fechas):
                 # 3. Si no hay horario especial, obtener horario normal según el día de la semana
                 dia_semana = datetime.strptime(
                     fecha, "%Y-%m-%d").strftime("%A")
+                print(dia_semana)
                 query = "SELECT hora_apertura, hora_cierre FROM horario WHERE dia_semana = %s"
                 cursor.execute(query, (dia_semana,))
                 resultado = cursor.fetchone()
@@ -145,15 +146,13 @@ def get_horario(fechas):
         conn.close()
 
 
-def hacer_reserva(fecha=None, hora=None, nombre=None):
+def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
     """
     Inserta una reserva en la base de datos solo si:
       - La fecha no está en la base de datos de fechas no disponibles.
       - La fecha no es demasiado lejana.
       - La hora es válida (12:00, 13:00, 14:00 o 15:00).
     """
-    if not nombre:
-        return {"error": "Falta el nombre para la reserva."}
     if not fecha:
         return {"error": "Falta la fecha para la reserva."}
     if not hora:
@@ -178,6 +177,17 @@ def hacer_reserva(fecha=None, hora=None, nombre=None):
     horas_permitidas = ["12:00", "13:00", "14:00", "15:00"]
     if hora not in horas_permitidas:
         return {"error": "Solo se permiten reservas a las 12:00, 13:00, 14:00 o 15:00."}
+
+    disponibilidad = info_reservas(fechas=fecha, horas=hora)
+    print(disponibilidad)
+    if disponibilidad.get(f"{fecha} {hora}") == "Ocupada":
+        return {"error": "La hora seleccionada ya está ocupada."}
+
+    if not nombre:
+        return {"error": "Falta el nombre para la reserva."}
+
+    if not confirmacion:
+        return {"pregunta esto": f"Confirma la reserva para el día {fecha} a las {hora} a nombre de {nombre}?"}
 
     try:
         conn = get_connection()
@@ -216,7 +226,7 @@ def info_reservas(fechas=None, horas=None):
         fechas_list = fechas
     else:
         return {"error": "Formato de fechas inválido"}
-    
+
     fechas_cerradas = obtener_fechas_cerradas()
     fechas_validadas = validar_fechas(fechas_list, fechas_cerradas)
 
@@ -263,17 +273,21 @@ def info_reservas(fechas=None, horas=None):
         respuesta.update(disponibilidad)
     return respuesta
 
+
 def eliminar_reserva(fecha=None, hora=None, nombre=None):
     """
     Elimina una reserva existente que coincida con fecha, hora y nombre.
     Retorna un mensaje de éxito o de error si no se encontró.
     """
-    if not fecha or not nombre:
-        return {"error": "Faltan la fecha o el nombre para eliminar la reserva."}
+    if not fecha:
+        return {"error": "Falta la fecha para eliminar la reserva."}
 
     # Se puede requerir la hora o no, depende de tu lógica.
     if not hora:
         return {"error": "Falta la hora de la reserva."}
+
+    if not nombre:
+        return {"error": "Falta el nombre para eliminar la reserva."}
 
     try:
         conn = get_connection()

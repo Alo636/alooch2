@@ -8,3 +8,10 @@ __pycache__/
 credenciales/
 path/to/env/
 
+.DS_Store
+
+# Archivos de configuración del editor
+.vscode/
+.idea/
+
+

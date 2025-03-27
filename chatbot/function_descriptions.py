@@ -84,10 +84,13 @@ function_descriptions_multiple = [
                 "nombre": {
                     "type": ["string", "null"],
                 },
+                "confirmacion": {
+                    "type": "boolean",
+                    "description": "La confirmacion de la reserva",
+                },
             },
             "required": [],
         },
-
     },
     {
         "name": "eliminar_reserva",
