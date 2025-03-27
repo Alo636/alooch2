@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
 
-{/* Icono de bandera redonda al lado del "nombre" (Título) */}
-
 // Opcional: puedes añadir aquí otras banderas y nombres de idiomas que quieras soportar
 const LANGUAGES = [
   {
