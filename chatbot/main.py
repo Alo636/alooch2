@@ -51,6 +51,16 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
     if len(str(conversation_history)) > max_tokens:
         conversation_history = summarize_history(conversation_history)
 
+    # Podrías usar la variable `language` para modificar la forma en que
+    # preparas las instrucciones, por ejemplo añadiendo un mensaje "sistema"
+    # que indique al modelo el idioma en que debe responder.
+    #
+    # EJEMPLO rápido (opcional):
+    # conversation_start.append({
+    #     "role": "system",
+    #     "content": f"El usuario quiere respuestas en el idioma: {language}."
+    # })
+
     conversation_start = conversation_start + conversation_history
     conversation_end = conversation_end + conversation_history
 

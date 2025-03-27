@@ -134,7 +134,7 @@ def get_horario(fechas):
 
             except ValueError:
                 horarios[fecha] = {
-                    "error": "Formato de fecha inválido. Debe ser YYYY-MM-DD."}
+                    "error": "Fecha no válida."}
         return horarios
 
     except (ValueError, KeyError, FileNotFoundError, ConnectionError) as e:
@@ -285,6 +285,9 @@ def eliminar_reserva(fecha=None, hora=None, nombre=None):
     # Se puede requerir la hora o no, depende de tu lógica.
     if not hora:
         return {"error": "Falta la hora de la reserva."}
+
+    if not nombre:
+        return {"error": "Falta el nombre para eliminar la reserva."}
 
     if not nombre:
         return {"error": "Falta el nombre para eliminar la reserva."}
