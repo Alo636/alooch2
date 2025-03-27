@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, {useState} from 'react';
 
 {/* Icono de bandera redonda al lado del "nombre" (Título) */}
 
@@ -290,9 +290,7 @@ const ChatBotUI = () => {
             {msg.content && (
               <div
                 style={{
-                  // Distinguimos el color según sea el user o el asistente
-                  backgroundColor:
-                    msg.role === 'assistant' ? '#f8f8f8' : '#000',
+                  backgroundColor: msg.role === 'assistant' ? '#f8f8f8' : '#000',
                   color: msg.role === 'assistant' ? '#000' : '#fff',
                   padding: '0.6rem 1rem',
                   borderRadius: '15px',
@@ -302,17 +300,12 @@ const ChatBotUI = () => {
                   alignItems: 'center',
                   whiteSpace: 'pre-wrap',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                  // Añadimos un pequeño borde para estilo
-                  border:
-                    msg.role === 'assistant'
-                      ? '1px solid #ccc'
-                      : '1px solid #000',
+                  border: msg.role === 'assistant' ? '1px solid #ccc' : '1px solid #000',
                 }}
               >
                 {msg.content}
               </div>
             )}
-
             {/* Imagen adjunta (si existe) */}
             {msg.imageUrl && (
               <img
