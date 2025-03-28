@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 
 // Opcional: puedes añadir aquí otras banderas y nombres de idiomas que quieras soportar
 const LANGUAGES = [
@@ -36,6 +36,14 @@ const ChatBotUI = () => {
 
   // Función para encontrar el objeto de idioma actualmente seleccionado
   const currentLanguage = LANGUAGES.find((lang) => lang.code === language);
+
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const handleSendMessage = async () => {
     // Evitar enviar mensajes vacíos
@@ -383,6 +391,7 @@ const ChatBotUI = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* INPUT Y BOTÓN ENVIAR */}
