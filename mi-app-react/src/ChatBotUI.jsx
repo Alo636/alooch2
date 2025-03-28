@@ -55,7 +55,7 @@ const ChatBotUI = () => {
 
     try {
       // Hacer la petición con el historial ACTUALIZADO y el idioma seleccionado
-      const response = await fetch('http://127.0.0.1:8000', {
+      const response = await fetch('alooch2-production.up.railway.app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
