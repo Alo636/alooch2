@@ -240,7 +240,7 @@ def info_reservas(fechas=None, horas=None):
         horas_no_disponibles = [
             h for h in horas_solicitadas if h not in horas_permitidas]
         if horas_no_disponibles:
-            return f"La(s) hora(s) {', '.join(horas_no_disponibles)} no están disponibles para reservar."
+            return f"Las {', '.join(horas_no_disponibles)} no están disponibles para reservar."
         # Filtramos solo las horas permitidas
         horas_permitidas = [
             h for h in horas_solicitadas if h in horas_permitidas]
