@@ -426,7 +426,7 @@ const ChatBotUI = () => {
           onKeyPress={(e) => {
             if (e.key === 'Enter') handleSendMessage();
           }}
-          placeholder={placeholder}
+          placeholder={currentLanguage.placeholder}
         />
         <button
           style={{
@@ -446,7 +446,7 @@ const ChatBotUI = () => {
           onMouseEnter={(e) => (e.target.style.backgroundColor = '#333')}
           onMouseLeave={(e) => (e.target.style.backgroundColor = '#000')}
         >
-          {send}
+          {currentLanguage.send}
         </button>
       </div>
 
@@ -472,7 +472,7 @@ const ChatBotUI = () => {
           e.target.style.backgroundColor = '#fff';
         }}
       >
-        {reset}
+        {currentLanguage.reset}
       </button>
 
       {/* MODAL PARA MOSTRAR IMAGEN AMPLIADA */}
