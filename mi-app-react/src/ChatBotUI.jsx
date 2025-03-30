@@ -25,6 +25,25 @@ const LANGUAGES = [
   // Agrega más si lo deseas
 ];
 
+// 🆕 Objeto con las traducciones de la interfaz
+const translations = {
+  es: {
+    placeholder: "Escribe tu mensaje...",
+    send: "Enviar",
+    reset: "Reiniciar conversación",
+  },
+  en: {
+    placeholder: "Type your message...",
+    send: "Send",
+    reset: "Restart conversation",
+  },
+  fr: {
+    placeholder: "Écris ton message...",
+    send: "Envoyer",
+    reset: "Redémarrer la conversation",
+  }
+};
+
 const ChatBotUI = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -33,6 +52,8 @@ const ChatBotUI = () => {
 
   // Estado para el idioma seleccionado
   const [language, setLanguage] = useState('es');
+
+  const t = translations[language] || translations['es'];
 
   // Función para encontrar el objeto de idioma actualmente seleccionado
   const currentLanguage = LANGUAGES.find((lang) => lang.code === language);
@@ -73,6 +94,7 @@ const ChatBotUI = () => {
             role: msg.role,
             content: msg.content,
           })),
+          language
         }),
       });
 
@@ -217,6 +239,14 @@ const ChatBotUI = () => {
         >
           Chat en Blanco y Negro
         </h1>
+        {/* 🆕 Selector de idioma */}
+        <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+          </select>
+        </div>
       </div>
 
       {/* MENÚ DESPLEGABLE PARA CAMBIAR DE IDIOMA CON BANDERA */}
@@ -414,7 +444,7 @@ const ChatBotUI = () => {
           onKeyPress={(e) => {
             if (e.key === 'Enter') handleSendMessage();
           }}
-          placeholder="Escribe tu mensaje..."
+          placeholder={t.placeholder}
         />
         <button
           style={{
@@ -434,7 +464,7 @@ const ChatBotUI = () => {
           onMouseEnter={(e) => (e.target.style.backgroundColor = '#333')}
           onMouseLeave={(e) => (e.target.style.backgroundColor = '#000')}
         >
-          Enviar
+          {t.send}
         </button>
       </div>
 
@@ -460,7 +490,7 @@ const ChatBotUI = () => {
           e.target.style.backgroundColor = '#fff';
         }}
       >
-        Reiniciar conversación
+        {t.reset}
       </button>
 
       {/* MODAL PARA MOSTRAR IMAGEN AMPLIADA */}
