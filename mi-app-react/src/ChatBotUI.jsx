@@ -6,43 +6,36 @@ const LANGUAGES = [
     code: 'es',
     name: 'Español',
     flagUrl: 'https://cdn-icons-png.flaticon.com/512/197/197593.png', // Bandera de España
+    placeholder: "Escribe tu mensaje...",
+    send: "Enviar",
+    reset: "Reiniciar conversación",
   },
   {
     code: 'en',
     name: 'English',
     flagUrl: 'https://cdn-icons-png.flaticon.com/512/197/197374.png', // Bandera (EE.UU./Inglaterra)
+    placeholder: "Type your message...",
+    send: "Send",
+    reset: "Restart conversation",
   },
   {
     code: 'fr',
     name: 'Français',
     flagUrl: 'https://cdn-icons-png.flaticon.com/512/197/197560.png', // Bandera de Francia
+    placeholder: "Écris ton message...",
+    send: "Envoyer",
+    reset: "Redémarrer la conversation",
   },
   {
     code: 'it',
     name: 'Italiano',
     flagUrl: 'https://cdn-icons-png.flaticon.com/512/197/197626.png', // Bandera de Italia
+    placeholder: "Scrivi il tuo messaggio...",
+    send: "Invia",
+    reset: "Riavvia la conversazione",
   },
   // Agrega más si lo deseas
 ];
-
-// 🆕 Objeto con las traducciones de la interfaz
-const translations = {
-  es: {
-    placeholder: "Escribe tu mensaje...",
-    send: "Enviar",
-    reset: "Reiniciar conversación",
-  },
-  en: {
-    placeholder: "Type your message...",
-    send: "Send",
-    reset: "Restart conversation",
-  },
-  fr: {
-    placeholder: "Écris ton message...",
-    send: "Envoyer",
-    reset: "Redémarrer la conversation",
-  }
-};
 
 const ChatBotUI = () => {
   const [messages, setMessages] = useState([]);
@@ -52,8 +45,6 @@ const ChatBotUI = () => {
 
   // Estado para el idioma seleccionado
   const [language, setLanguage] = useState('es');
-
-  const t = translations[language] || translations['es'];
 
   // Función para encontrar el objeto de idioma actualmente seleccionado
   const currentLanguage = LANGUAGES.find((lang) => lang.code === language);
@@ -94,7 +85,6 @@ const ChatBotUI = () => {
             role: msg.role,
             content: msg.content,
           })),
-          language
         }),
       });
 
@@ -239,14 +229,6 @@ const ChatBotUI = () => {
         >
           Chat en Blanco y Negro
         </h1>
-        {/* 🆕 Selector de idioma */}
-        <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="es">Español</option>
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-          </select>
-        </div>
       </div>
 
       {/* MENÚ DESPLEGABLE PARA CAMBIAR DE IDIOMA CON BANDERA */}
@@ -444,7 +426,7 @@ const ChatBotUI = () => {
           onKeyPress={(e) => {
             if (e.key === 'Enter') handleSendMessage();
           }}
-          placeholder={t.placeholder}
+          placeholder={placeholder}
         />
         <button
           style={{
@@ -464,7 +446,7 @@ const ChatBotUI = () => {
           onMouseEnter={(e) => (e.target.style.backgroundColor = '#333')}
           onMouseLeave={(e) => (e.target.style.backgroundColor = '#000')}
         >
-          {t.send}
+          {send}
         </button>
       </div>
 
@@ -490,7 +472,7 @@ const ChatBotUI = () => {
           e.target.style.backgroundColor = '#fff';
         }}
       >
-        {t.reset}
+        {reset}
       </button>
 
       {/* MODAL PARA MOSTRAR IMAGEN AMPLIADA */}
