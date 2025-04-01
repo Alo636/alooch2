@@ -1,24 +1,23 @@
 
 function_descriptions_multiple = [
     {
-    "name": "get_image",
-    "description": "Devuelve la imagen de un platillo específico si está disponible.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "plato": {
-                "type": "string",
-                "description": "Nombre del platillo del que se quiere obtener la imagen."
-            }
-        },
-        "required": ["plato"]
-    }
+        "name": "get_image",
+        "description": "Devuelve la imagen de un platillo específico si está disponible.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "plato": {
+                    "type": "string",
+                    "description": "Nombre del platillo del que se quiere obtener la imagen."
+                }
+            },
+            "required": ["plato"]
+        }
     },
-
     {
-    "name": "get_contact_info",
-    "description": "Devuelve la información de contacto del restaurante, incluyendo teléfono, email y página web.",
-    "parameters": {}
+        "name": "get_contact_info",
+        "description": "Devuelve la información de contacto del restaurante, incluyendo teléfono, email y página web.",
+        "parameters": {}
     },
     {
         "name": "get_menu",
@@ -63,6 +62,10 @@ function_descriptions_multiple = [
                     "description": "Lista de horas de la reserva en formato HH:MM. Tiene que ser una cadena separada por comas.",
                     "items": {"type": "string"},
                 },
+                "personas": {
+                    "type": ["integer", "null"],
+                    "description": "Número de personas para la reserva."
+                },
             },
             "required": [],
         },
@@ -87,6 +90,10 @@ function_descriptions_multiple = [
                 "confirmacion": {
                     "type": "boolean",
                     "description": "La confirmacion de la reserva",
+                },
+                "personas": {
+                    "type": ["integer", "null"],
+                    "description": "Número de personas para la reserva."
                 },
             },
             "required": [],

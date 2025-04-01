@@ -1,10 +1,14 @@
 """
 disque
 """
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import os
 from datetime import datetime, timedelta
 import mysql.connector
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -27,7 +31,7 @@ def cargar_instrucciones_start(language):
 1-Instrucciones generales:-Siempre que te pregunten por horarios o reservas, quiero llames a una función.
 2-Instrucciones de comportamiento:-Saluda solo una vez al inicio de la conversación y no repitas saludos innecesariamente.-Hoy es {translate_day(hoy.strftime("%A"))}, {hoy.day} del {hoy.month} de {hoy.year}. Responde teniendo en cuenta esta fecha.
 -Si el usuario responde con 'vale', 'ok', 'sí', 'claro', 'de acuerdo' u otra afirmación breve, tómalos como confirmación.- En caso de recibir una afirmación, mira si estabas ofreciendo algo. En caso afirmativo llévalo a cabo. En caso negativo, ofrécele ayuda sin saludar.
-3-Instrucciones de reservas, Pasos a seguir:- Si te hablan para reservar en una fecha, di primero la disponibilidad que hay en esa fecha.- Si te preguntan por disponibilidad de reservas, mira siempre la disponibilidad con info_reservas.
+3-Instrucciones de reservas, Pasos a seguir:- Si te hablan para reservar en una fecha, di primero la disponibilidad que hay en esa fecha.- Si te preguntan por disponibilidad de reservas, mira siempre la disponibilidad con info_reservas.- No te inventes parámetros si no han sido dichos.
 -Si estás hablando de reservas, no hace falta que digas el horario de apertura y cierre.
 4-Instrucciones de horario, Pasos a seguir:-Mira siempre la disponibilidad con get_horario.
 5-Instrucciones de respuesta:-Quiero que no uses nombres de días de la semana, solo fechas en formato DD-MM-YYYY.
@@ -72,11 +76,10 @@ def validar_fechas(fechas_list, fechas_cerradas):
 
 def get_connection():
     return mysql.connector.connect(
-        port=os.getenv("DB_PORT"),
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
     )
 
 
@@ -154,3 +157,36 @@ def traducir_language_code(language_code):
     }
 
     return language_map.get(language_code, 'Desconocido')
+
+
+def mesas_necesarias(personas):
+    mesas = 1
+    while True:
+        if mesas == 1:
+            capacidad = 4
+        else:
+            capacidad = 2 * mesas + 2
+        if capacidad >= personas:
+            return mesas
+        mesas += 1
+
+
+def enviar_correo_reserva(fecha, hora, nombre, email_destino):
+    asunto = "Nueva reserva recibida"
+    cuerpo = f"Reserva confirmada:\n\nNombre: {nombre}\nFecha: {fecha}\nHora: {hora}"
+
+    mensaje = MIMEMultipart()
+    mensaje["From"] = os.getenv("EMAIL_REMITENTE")
+    mensaje["To"] = email_destino
+    mensaje["Subject"] = asunto
+
+    mensaje.attach(MIMEText(cuerpo, "plain"))
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
+            servidor.login(os.getenv("EMAIL_REMITENTE"),
+                           os.getenv("EMAIL_PASSWORD"))
+            servidor.sendmail(
+                mensaje["From"], mensaje["To"], mensaje.as_string())
+    except Exception as e:
+        logging.error(f"Error al enviar correo: {e}")

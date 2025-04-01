@@ -1,4 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react';
+import { User2 } from 'lucide-react';
 
 // Opcional: puedes añadir aquí otras banderas y nombres de idiomas que quieras soportar
 const LANGUAGES = [
@@ -46,10 +47,25 @@ const ChatBotUI = () => {
   // Estado para el idioma seleccionado
   const [language, setLanguage] = useState('es');
 
+  const [userId, setUserId] = useState(() => localStorage.getItem('userId') || null); 
+  const [userData, setUserData] = useState(() => JSON.parse(localStorage.getItem('userData')) || null);
+
+  // 🆕 Estados para autenticación
+  const [authVisible, setAuthVisible] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [authUsername, setAuthUsername] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authConfirmPassword, setAuthConfirmPassword] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
+
   // Función para encontrar el objeto de idioma actualmente seleccionado
   const currentLanguage = LANGUAGES.find((lang) => lang.code === language);
 
   const messagesEndRef = useRef(null);
+
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -57,6 +73,12 @@ const ChatBotUI = () => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (userId && userData) {
+      setAuthVisible(true); // Mostrar el panel del usuario al iniciar si ya está autenticado
+    }
+  }, []);
+  
   const handleSendMessage = async () => {
     // Evitar enviar mensajes vacíos
     if (!inputValue.trim()) return;
@@ -75,7 +97,7 @@ const ChatBotUI = () => {
 
     try {
       // Hacer la petición con el historial ACTUALIZADO y el idioma seleccionado
-      const response = await fetch('https://alooch2-production.up.railway.app/ask', {
+      const response = await fetch('http://127.0.0.1:8000/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,6 +107,7 @@ const ChatBotUI = () => {
             role: msg.role,
             content: msg.content,
           })),
+          user_id: userId
         }),
       });
 
@@ -195,20 +218,289 @@ const ChatBotUI = () => {
     setSelectedImage(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userData');
+    setUserId(null);
+    setUserData(null);
+    setMessages([]);
+    setAuthVisible(false);
+  };
+  
   return (
-    <div
-      style={{
-        maxWidth: '600px',
-        margin: '0 auto',
-        marginTop: '2rem',
-        backgroundColor: '#fff', // Fondo blanco
-        borderRadius: '10px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-        padding: '2rem',
-        fontFamily: 'Georgia, serif',
-        color: '#000', // Texto en negro
-      }}
-    >
+    <div style={{ maxWidth: '600px', margin: '0 auto', marginTop: '2rem', backgroundColor: '#fff', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.2)', padding: '2rem', fontFamily: 'Georgia, serif', color: '#000' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <button
+        onClick={() => {
+          if (userId && userData) {
+            setAuthVisible((prev) => !prev); // Mostrar/ocultar panel del usuario logueado
+          } else {
+            setAuthMode("login");
+            setAuthVisible(true); // Mostrar formulario de login
+          }
+        }}
+        style={{
+          background: 'none',
+          border: 'none',
+          fontSize: '1.5rem',
+          cursor: 'pointer',
+          color: '#000',
+        }}
+        title={userId ? "Ver perfil" : "Iniciar sesión / Registrarse"}
+      >
+        <User2 style={{ color: userId ? "green" : "#000" }} />
+      </button>
+
+      </div>
+
+      {authVisible && (
+      <div
+        style={{
+          backgroundColor: '#fff',
+          border: '1px solid #ccc',
+          borderRadius: '10px',
+          padding: '1.2rem',
+          width: '100%',
+          maxWidth: '320px',
+          marginBottom: '1rem',
+          boxShadow: '0 3px 8px rgba(0,0,0,0.15)',
+          marginLeft: 'auto',
+          color: '#000',
+          fontFamily: 'inherit'
+        }}
+      >
+        {userId && userData ? (
+          <>
+            <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Mi perfil</h2>
+            <p><strong>Usuario:</strong> {userData.username}</p>
+            <div style={{ marginBottom: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <strong style={{ fontSize: '1rem' }}>Datos de contacto</strong>
+              <button
+                onClick={() => setEditandoPerfil((prev) => !prev)}
+                title="Editar"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  color: '#888',
+                }}
+              >
+                ✏️
+              </button>
+            </div>
+
+            {!editandoPerfil ? (
+              <div style={{ marginTop: '0.5rem' }}>
+                <p><strong>Email:</strong> {userData.email}</p>
+                <p><strong>Teléfono:</strong> {userData.telefono || "No indicado"}</p>
+              </div>
+            ) : (
+              <>
+                <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  <strong>Email:</strong>
+                  <input
+                    type="email"
+                    value={userData.email || ""}
+                    onChange={(e) =>
+                      setUserData((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    style={{
+                      width: '100%',
+                      marginTop: '0.2rem',
+                      padding: '0.4rem',
+                      borderRadius: '4px',
+                      border: '1px solid #ccc',
+                    }}
+                  />
+                </label>
+
+                <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  <strong>Teléfono:</strong>
+                  <input
+                    type="tel"
+                    value={userData.telefono || ""}
+                    onChange={(e) =>
+                      setUserData((prev) => ({ ...prev, telefono: e.target.value }))
+                    }
+                    style={{
+                      width: '100%',
+                      marginTop: '0.2rem',
+                      padding: '0.4rem',
+                      borderRadius: '4px',
+                      border: '1px solid #ccc',
+                    }}
+                  />
+                </label>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("http://127.0.0.1:8000/update_user", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          user_id: userId,
+                          email: userData.email,
+                          telefono: userData.telefono ? userData.telefono : null,
+                        }),
+                      });
+                    
+                      const result = await res.json();
+                    
+                      if (!res.ok) {
+                        console.error("❌ Error al actualizar perfil:", result);
+                        alert("❌ Error al actualizar perfil:\n" + JSON.stringify(result, null, 2));
+                        return;
+                      }
+                    
+                      localStorage.setItem("userData", JSON.stringify(userData));
+                      alert("✅ Perfil actualizado correctamente");
+                      setEditandoPerfil(false);
+                    } catch (err) {
+                      console.error("❌ Error al conectar:", err);
+                      alert("❌ Error al conectar con el servidor");
+                    }
+                    
+                  }}
+                  style={{
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '5px',
+                    padding: '0.5rem',
+                    width: '100%',
+                    marginBottom: '1rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  💾 Guardar cambios
+                </button>
+              </>
+            )}
+          </div>
+
+
+            <hr style={{ margin: '1rem 0' }} />
+
+            <button
+              onClick={() => alert("Historial no implementado aún")}
+              style={{
+                width: '100%',
+                marginBottom: '0.5rem',
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                padding: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              🕒 Ver historial
+            </button>
+
+            <button
+              onClick={() => alert("Configuración no implementada aún")}
+              style={{
+                width: '100%',
+                marginBottom: '0.5rem',
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                padding: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              ⚙️ Configuración
+            </button>
+
+            <button
+              onClick={() => alert("Política de privacidad no implementada aún")}
+              style={{
+                width: '100%',
+                marginBottom: '0.5rem',
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+                padding: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              📄 Política de privacidad
+            </button>
+
+            <button
+              onClick={handleLogout}
+              style={{
+                backgroundColor: '#000',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                padding: '0.5rem',
+                width: '100%',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                marginTop: '0.5rem',
+              }}
+            >
+              🔐 Cerrar sesión
+            </button>
+          </>
+          ) : (
+            <>
+              <input type="text" placeholder="Nombre de usuario" value={authUsername} onChange={(e) => setAuthUsername(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: 'inherit', color: '#000' }} />
+              <input type="password" placeholder="Contraseña" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: 'inherit', color: '#000' }} />
+              {authMode === "register" && (
+                <>
+                  <input type="password" placeholder="Confirmar contraseña" value={authConfirmPassword} onChange={(e) => setAuthConfirmPassword(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: 'inherit', color: '#000' }} />
+                  <input type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: 'inherit', color: '#000' }} />
+                  <input type="tel" placeholder="Teléfono (opcional)" value={authPhone} onChange={(e) => setAuthPhone(e.target.value)} style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: 'inherit', color: '#000' }} />
+                </>
+              )}
+              <button onClick={async () => {
+                if (!authUsername || !authPassword) return alert("Usuario y contraseña son obligatorios");
+                if (authMode === "register") {
+                  if (!authEmail) return alert("El email es obligatorio");
+                  if (authPassword !== authConfirmPassword) return alert("Las contraseñas no coinciden");
+                }
+                try {
+                  const body = authMode === "register"
+                    ? { username: authUsername, password: authPassword, email: authEmail, ...(authPhone && { telefono: authPhone }) }
+                    : { username: authUsername, password: authPassword };
+                  const res = await fetch(`http://127.0.0.1:8000/${authMode}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) return alert(data.detail || "Error de autenticación");
+                  localStorage.setItem("userId", data.user_id);
+                  localStorage.setItem("userData", JSON.stringify(data));
+                  setUserId(data.user_id);
+                  setUserData(data);
+                  setAuthVisible(false);
+                  setAuthUsername("");
+                  setAuthPassword("");
+                  setAuthConfirmPassword("");
+                  setAuthEmail("");
+                  setAuthPhone("");
+                  alert("Autenticación correcta");
+                } catch (err) {
+                  console.error(err);
+                  alert("Error al conectar");
+                }
+              }} style={{ backgroundColor: '#000', color: '#fff', border: 'none', borderRadius: '5px', padding: '0.5rem', width: '100%', marginBottom: '0.5rem', cursor: 'pointer', fontWeight: 'bold' }}>
+                {authMode === "login" ? "Iniciar sesión" : "Registrarse"}
+              </button>
+              <div style={{ fontSize: '0.9rem' }}>
+                {authMode === "login"
+                  ? <>¿No tienes cuenta? <button onClick={() => setAuthMode("register")} style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>Regístrate</button></>
+                  : <>¿Ya tienes cuenta? <button onClick={() => setAuthMode("login")} style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>Inicia sesión</button></>
+                }
+              </div>
+            </>
+          )}
+        </div>
+      )}
       {/* CONTENEDOR DE TÍTULO + SELECCIÓN DE IDIOMA */}
       <div
         style={{

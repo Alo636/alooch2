@@ -1,6 +1,6 @@
 
 from dotenv import load_dotenv
-from chatbot.utils import get_connection, obtener_fechas_cerradas, validar_fechas, format_menu_response
+from chatbot.utils import get_connection, obtener_fechas_cerradas, validar_fechas, format_menu_response, mesas_necesarias
 from datetime import datetime, timedelta
 import logging
 
@@ -146,7 +146,7 @@ def get_horario(fechas):
         conn.close()
 
 
-def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
+def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False, personas=None):
     """
     Inserta una reserva en la base de datos solo si:
       - La fecha no está en la base de datos de fechas no disponibles.
@@ -157,6 +157,8 @@ def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
         return {"error": "Falta la fecha para la reserva."}
     if not hora:
         return {"error": "Falta la hora para la reserva."}
+    if not personas:
+        return {"error": "¿Para cuántas personas?"}
 
     # Convertir la fecha de string a objeto datetime
     fecha_reserva = datetime.strptime(fecha, "%Y-%m-%d")
@@ -178,7 +180,7 @@ def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
     if hora not in horas_permitidas:
         return {"error": "Solo se permiten reservas a las 12:00, 13:00, 14:00 o 15:00."}
 
-    disponibilidad = info_reservas(fechas=fecha, horas=hora)
+    disponibilidad = info_reservas(fechas=fecha, horas=hora, personas=personas)
     print(disponibilidad)
     if disponibilidad.get(f"{fecha} {hora}") == "Ocupada":
         return {"error": "La hora seleccionada ya está ocupada."}
@@ -187,7 +189,9 @@ def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
         return {"error": "Falta el nombre para la reserva."}
 
     if not confirmacion:
-        return {"pregunta esto": f"Confirma la reserva para el día {fecha} a las {hora} a nombre de {nombre}?"}
+        return {"error": f"Confirma la reserva para el día {fecha} a las {hora} a nombre de {nombre}?"}
+
+    numero_mesas = mesas_necesarias(personas)
 
     try:
         conn = get_connection()
@@ -198,6 +202,13 @@ def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
             VALUES (%s, %s, %s)
         """
         cursor.execute(query, (fecha, hora, nombre))
+
+        cursor.execute("""
+            UPDATE disponibilidad_mesas
+            SET total_mesas = total_mesas - %s
+            WHERE fecha = %s AND hora = %s AND total_mesas >= %s
+        """, (numero_mesas, fecha, hora, numero_mesas))
+
         conn.commit()
 
         reserva_id = cursor.lastrowid
@@ -216,9 +227,11 @@ def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False):
         conn.close()
 
 
-def info_reservas(fechas=None, horas=None):
+def info_reservas(fechas=None, horas=None, personas=None):
     if not fechas:
         return {"error": "Fechas no recibidas"}
+    if not personas:
+        return {"error": "¿Para cuántas personas?"}
 
     if isinstance(fechas, str):
         fechas_list = [f.strip() for f in fechas.split(",")]
@@ -241,7 +254,6 @@ def info_reservas(fechas=None, horas=None):
             h for h in horas_solicitadas if h not in horas_permitidas]
         if horas_no_disponibles:
             return f"Las {', '.join(horas_no_disponibles)} no están disponibles para reservar."
-        # Filtramos solo las horas permitidas
         horas_permitidas = [
             h for h in horas_solicitadas if h in horas_permitidas]
 
@@ -249,33 +261,39 @@ def info_reservas(fechas=None, horas=None):
     if not fechas_list:
         return {"error": "No se encontraron fechas válidas."}
 
+    numero_mesas = mesas_necesarias(personas)
+
     conn = get_connection()
     cursor = conn.cursor()
 
-    placeholders = ",".join(["%s"] * len(fechas_list))
-    query = f"SELECT fecha, hora FROM reservas WHERE fecha IN ({placeholders})"
+    respuesta = {}
 
-    cursor.execute(query, tuple(fechas_list))
-    rows = cursor.fetchall()
+    for fecha in fechas_list:
+        for hora in horas_permitidas:
+            # Obtener cuántas reservas hay para esa fecha y hora
+            cursor.execute("""
+                SELECT COUNT(*) FROM reservas WHERE fecha = %s AND hora = %s
+            """, (fecha, hora))
+            reservas_actuales = cursor.fetchone()[0]
+
+            # Obtener el total de mesas disponibles desde la nueva tabla
+            cursor.execute("""
+                SELECT total_mesas FROM disponibilidad_mesas WHERE fecha = %s AND hora = %s
+            """, (fecha, hora))
+            resultado = cursor.fetchone()
+            if resultado:
+                mesas_disponibles = resultado[0]
+            else:
+                mesas_disponibles = 10  # Valor por defecto si no se encuentra registro
+
+            clave = f"{fecha} {hora}"
+            if mesas_disponibles - reservas_actuales >= numero_mesas:
+                respuesta[clave] = "Libre"
+            else:
+                respuesta[clave] = "Ocupada"
+
     cursor.close()
     conn.close()
-
-    horas_ocupadas = {}
-    for fecha_ocupada, hora_ocupada in rows:
-        fecha_str = str(fecha_ocupada)
-        hora_str = str(hora_ocupada)[:5]  # Convertir "HH:MM:SS" a "HH:MM"
-
-        if fecha_str not in horas_ocupadas:
-            horas_ocupadas[fecha_str] = set()
-        horas_ocupadas[fecha_str].add(hora_str)
-
-    respuesta = {}
-    for fecha in fechas_list:
-        ocupadas = horas_ocupadas.get(fecha, set())
-        disponibilidad = {}
-        for h in horas_permitidas:
-            disponibilidad[f"{fecha} {h}"] = "Ocupada" if h in ocupadas else "Libre"
-        respuesta.update(disponibilidad)
     return respuesta
 
 
