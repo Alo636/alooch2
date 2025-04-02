@@ -66,6 +66,8 @@ const ChatBotUI = () => {
 
   const [editandoPerfil, setEditandoPerfil] = useState(false);
 
+  const [userHistory, setUserHistory] = useState([]);
+  const [showingHistory, setShowingHistory] = useState(false);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -380,11 +382,21 @@ const ChatBotUI = () => {
             )}
           </div>
 
-
             <hr style={{ margin: '1rem 0' }} />
 
             <button
-              onClick={() => alert("Historial no implementado aún")}
+              onClick={async () => {
+                try {
+                  const res = await fetch(`http://127.0.0.1:8000/user_history/${userId}`);
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.detail || "Error obteniendo historial");
+                  setUserHistory(data.historial);
+                  setShowingHistory(true);
+                } catch (err) {
+                  alert("❌ Error al cargar el historial: " + err.message);
+                }
+              }}
+
               style={{
                 width: '100%',
                 marginBottom: '0.5rem',
@@ -427,7 +439,6 @@ const ChatBotUI = () => {
             >
               📄 Política de privacidad
             </button>
-
             <button
               onClick={handleLogout}
               style={{
@@ -444,6 +455,78 @@ const ChatBotUI = () => {
             >
               🔐 Cerrar sesión
             </button>
+            {showingHistory && (
+              <div
+                style={{
+                  backgroundColor: "#f9f9f9",
+                  border: "1px solid #ccc",
+                  borderRadius: "10px",
+                  padding: "1rem",
+                  maxHeight: "300px",
+                  overflowY: "scroll",
+                  marginBottom: "1rem",
+                  color: "#000",
+                  fontFamily: "inherit",
+                  textAlign: "left",
+                }}
+              >
+                <h3>🕒 Historial de conversaciones</h3>
+                <button
+                  onClick={() => setShowingHistory(false)}
+                  style={{
+                    marginBottom: "0.8rem",
+                    backgroundColor: "#ddd",
+                    border: "none",
+                    padding: "0.4rem 0.6rem",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    color: "#000"
+                  }}
+                >
+                  Cerrar
+                </button>
+                {userHistory.length === 0 ? (
+                  <p>No hay conversaciones anteriores.</p>
+                ) : (
+                  Object.entries(
+                    userHistory.reduce((acc, conv) => {
+                      const fecha = new Date(conv.created_at);
+                      const dateKey = fecha.toLocaleDateString();
+                      const minuteKey = fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0');
+                      if (!acc[dateKey]) acc[dateKey] = {};
+
+                      // Si ya hay una conversación en el mismo minuto, comparar por created_at
+                      if (!acc[dateKey][minuteKey] || new Date(conv.created_at) > new Date(acc[dateKey][minuteKey].created_at)) {
+                        acc[dateKey][minuteKey] = conv;
+                      }
+                      return acc;
+                    }, {})
+                  ).sort((a, b) => new Date(b[0]) - new Date(a[0]))
+                    .map(([date, convsByMinute]) => {
+                      const conversaciones = Object.values(convsByMinute).sort(
+                        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                      );
+                      return (
+                        <div key={date} style={{ marginBottom: "1.5rem" }}>
+                          <h4 style={{ color: "#333", marginBottom: "0.5rem" }}>{date}</h4>
+                          <div style={{ fontSize: "0.95rem", whiteSpace: "pre-wrap" }}>
+                            {conversaciones.flatMap((conv, i) =>
+                              conv.contenido.map((msg, j) => (
+                                <p key={`${i}-${j}`} style={{ marginLeft: "1rem" }}>
+                                  <span style={{ color: "#666", marginRight: "0.4rem" }}>
+                                    {new Date(conv.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                  <strong>{msg.role === "user" ? "🧍 Usuario" : "🤖 Asistente"}:</strong> {msg.content}
+                                </p>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+            )}
           </>
           ) : (
             <>

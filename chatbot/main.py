@@ -146,6 +146,28 @@ async def update_user(data: UpdateUserRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/user_history/{user_id}")
+def get_user_history(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, contenido, created_at FROM conversaciones WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return {
+        "historial": [
+            {
+                "id": row[0],
+                "contenido": json.loads(row[1]),
+                "created_at": row[2].strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for row in rows
+        ]
+    }
+
+
 def pregunta_respuesta(user_message, conversation_history, language='es', mensaje_final=''):
     conversation_start = cargar_instrucciones_start(language)
     conversation_end = cargar_instrucciones_end(language)

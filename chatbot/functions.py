@@ -1,8 +1,10 @@
 
+import json
 from dotenv import load_dotenv
 from chatbot.utils import get_connection, obtener_fechas_cerradas, validar_fechas, format_menu_response, mesas_necesarias
 from datetime import datetime, timedelta
 import logging
+
 
 load_dotenv()
 # chatbot/functions.py
@@ -341,6 +343,40 @@ def eliminar_reserva(fecha=None, hora=None, nombre=None):
         return {"error": str(e)}
 
 
+def obtener_datos_usuario(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT username, email, telefono FROM usuarios WHERE id = %s", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return {
+            "user_id": user_id,
+            "username": result[0],
+            "email": result[1],
+            "telefono": result[2]
+        }
+    else:
+        return {"error": "Usuario no encontrado"}
+
+
+def obtener_historial_usuario(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT contenido, created_at FROM conversaciones WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {
+            "contenido": json.loads(row[0]),
+            "created_at": row[1].strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for row in rows
+    ]
+
+
 funciones_disponibles = {
     "get_menu": get_menu,
     "info_reservas": info_reservas,
@@ -349,4 +385,6 @@ funciones_disponibles = {
     "get_horario": get_horario,
     "get_contact_info": get_contact_info,
     "get_image": get_image,
+    "obtener_datos_usuario": obtener_datos_usuario,
+    "obtener_historial_usuario": obtener_historial_usuario,
 }

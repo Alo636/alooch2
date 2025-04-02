@@ -120,4 +120,32 @@ function_descriptions_multiple = [
             "required": [],
         },
     },
+    {
+        "name": "obtener_datos_usuario",
+        "description": "Devuelve el nombre de usuario, email y teléfono del usuario.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "integer",
+                    "description": "ID del usuario"
+                }
+            },
+            "required": ["user_id"]
+        }
+    },
+    {
+        "name": "obtener_historial_usuario",
+        "description": "Devuelve las conversaciones previas del usuario.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "integer",
+                    "description": "ID del usuario"
+                }
+            },
+            "required": ["user_id"]
+        }
+    },
 ]
