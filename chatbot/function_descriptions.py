@@ -33,8 +33,8 @@ function_descriptions_multiple = [
         }
     },
     {
-        "name": "get_horario",
-        "description": "Devuelve el horario del restaurante para una o varias fechas especificadas. Si una fecha está en la lista de fechas cerradas, se indicará como 'CERRADO'. Si tiene un horario especial, se mostrará dicho horario. Si no es una fecha cerrada ni tiene horario especial, se devolverá el horario regular correspondiente al día de la semana.",
+        "name": "get_horario_bar",
+        "description": "Devuelve el horario del bar para una o varias fechas especificadas.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -87,13 +87,13 @@ function_descriptions_multiple = [
                 "nombre": {
                     "type": ["string", "null"],
                 },
-                "confirmacion": {
-                    "type": "boolean",
-                    "description": "La confirmacion de la reserva",
-                },
                 "personas": {
                     "type": ["integer", "null"],
                     "description": "Número de personas para la reserva."
+                },
+                "confirmacion": {
+                    "type": "boolean",
+                    "description": "Es true cuando el usuario confirma la reserva.",
                 },
             },
             "required": [],

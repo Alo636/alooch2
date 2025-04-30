@@ -20,9 +20,8 @@ def revisar(text):
     Devuelve 1 si encuentra las palabras "obtendré" o "procederé" en la cadena dada, de lo contrario devuelve 0.
     """
     keywords = {"obtendré", "procederé",
-                "aquí está la información:", "obtenerlo", "aquí está:"}
+                "aquí está la información:", "obtenerlo", "aquí está:", "voy a obtener"}
     words = text.lower().split()
-
     return 1 if any(word in keywords for word in words) else 0
 
 

@@ -17,6 +17,7 @@ client = OpenAI(
     # Defaults to os.environ.get("OPENAI_API_KEY")
 )
 
+
 def llamar_api_openai(conversation_history, functions=None, function_call="auto", model="gpt-4o-mini", temperature=0):
     """
     Llama a la API de OpenAI para generar una respuesta a partir del historial de conversación dado.
@@ -57,6 +58,7 @@ def llamar_api_openai(conversation_history, functions=None, function_call="auto"
     # Extraemos el primer mensaje (asumiendo que siempre hay al menos una respuesta)
     return response.choices[0].message
 
+
 def summarize_history(historial):
     # Envía el historial a la API para obtener un resumen
     summary_prompt = [
@@ -74,13 +76,14 @@ def summarize_history(historial):
     # Devuelve el resumen como un nuevo mensaje del sistema
     return [{"role": "system", "content": summary}]
 
+
 def detectar_funciones(conversacion):
 
     summary_prompt = [
         {"role": "system", "content": "Devuelve solo el nombre sin nada más de todas las funciones que van a hacer falta para responder el mensaje del usuario separadas por comas y sin espacios."
-        "No quiero que llames a ninguna función. Si no hay ninguna función a la que llamar, no devuelvas nada. No quiero que le respondas al usuario. Sigue las instrucciones."
-        "-Si el usuario responde con 'vale', 'ok', 'sí', 'claro', 'de acuerdo' u otra afirmación breve, tómalos como confirmación.- En caso de recibir una afirmación, mira si estabas ofreciendo algo. En caso afirmativo llévalo a cabo. En caso negativo, ofrécele ayuda sin saludar."},
-        
+         "No quiero que llames a ninguna función. Si no hay ninguna función a la que llamar, no devuelvas nada. No quiero que le respondas al usuario. Sigue las instrucciones."
+         "-Si el usuario responde con 'vale', 'ok', 'sí', 'claro', 'de acuerdo' u otra afirmación breve, tómalos como confirmación.- En caso de recibir una afirmación, mira si estabas ofreciendo algo. En caso afirmativo llévalo a cabo. En caso negativo, ofrécele ayuda sin saludar."},
+
     ]
 
     response = client.chat.completions.create(
@@ -90,20 +93,3 @@ def detectar_funciones(conversacion):
         functions=function_descriptions_multiple,
     )
     return response.choices[0].message.content
-
-#def revisar(mensaje):#
-
-    prompt = [
-        {"role": "system", "content": "Quiero que si ves la palabra 'procederé' o 'obtendré' en el siguiente mensaje devuelvas un punto '.'."
-        "En caso de que no contengan ninguna palabra, no devuelvas nada."},
-        {"role":"assistant", "content": mensaje}
-
-    ]
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=prompt,
-        temperature=0,
-    )
-    return response.choices[0].message.content
-    

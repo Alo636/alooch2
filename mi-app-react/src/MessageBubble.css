@@ -1,0 +1,83 @@
+@keyframes fadeInSlideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+
+.message-container {
+    display: flex;
+    margin: 0.5rem 0;
+    position: relative;
+  }
+  
+  .message-container.assistant {
+    justify-content: flex-start;
+  }
+  
+  .message-container.user {
+    justify-content: flex-end;
+  }
+  
+  .message-bubble {
+    display: inline-block;
+    max-width: 60%;
+    padding: 0.5rem 0.9rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    word-break: break-word;
+    position: relative;
+    text-align: left;
+    animation: fadeInSlideUp 0.3s ease forwards;
+    animation-fill-mode: both;
+  }
+  
+  
+  /* Mensaje del asistente */
+  .message-container.assistant .message-bubble {
+    background-color: #f0f0f0;
+    color: #111;
+    border: 1px solid #f0f0f0;
+  }
+  
+  .message-container.assistant .message-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: 3px; /* un poco más arriba */
+    left: -3px; /* más afuera */
+    width: 7px; /* ligeramente más pequeño */
+    height: 7px;
+    background-color: #f0f0f0;
+    border-radius: 0 0 10px 0;
+    transform: rotate(45deg);
+    border-left: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  /* Mensaje del usuario */
+  .message-container.user .message-bubble {
+    background-color: #73b6ff;
+    color: #ffffff;
+    border: 1px solid #73b6ff;
+  }
+  
+  .message-container.user .message-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: 3px;
+    right: -3px; /* más afuera */
+    width: 7px; /* ligeramente más pequeño */
+    height: 7px;
+    background-color: #73b6ff;
+    border-radius: 0 0 0 10px;
+    transform: rotate(-45deg);
+    border-right: 1px solid #73b6ff;
+    border-bottom: 1px solid #73b6ff;
+  }
+  

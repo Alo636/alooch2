@@ -126,7 +126,6 @@ def login(user: LoginInput):
 @app.post("/update_user")
 async def update_user(data: UpdateUserRequest):
     try:
-        print("Datos recibidos para actualizar:", data)
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -168,6 +167,21 @@ def get_user_history(user_id: int):
     }
 
 
+@app.get("/restaurant_info")
+def get_restaurant_info():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nombre, logo_url FROM restaurante LIMIT 1")
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if row:
+        return {"nombre": row[0], "logo_url": row[1]}
+    else:
+        return {"nombre": "Restaurante XYZ", "logo_url": ""}
+
+
 def pregunta_respuesta(user_message, conversation_history, language='es', mensaje_final=''):
     conversation_start = cargar_instrucciones_start(language)
     conversation_end = cargar_instrucciones_end(language)
@@ -196,14 +210,11 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
 
     if hasattr(response, 'function_call') and response.function_call is not None:
         function_name = response.function_call.name
-        print(function_name)
         parameters = json.loads(response.function_call.arguments)
-        print(parameters)
 
         if function_name in funciones_disponibles:
             function_result = funciones_disponibles[function_name](
                 **parameters)
-            print(function_result)
 
             conversation_end.append({
                 "role": "assistant",
@@ -222,7 +233,6 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
             })
 
             revision = revisar(final_response.content)
-            print(revision)
             if revision == 1:
                 mensaje_final += pregunta_respuesta(
                     'obten la información',
@@ -233,7 +243,6 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
             mensaje_final = final_response.content + mensaje_final
             return mensaje_final
 
-    print(response.content)
     return response.content if response.content else "No se obtuvo respuesta."
 
 # Para correr: uvicorn main:app --reload

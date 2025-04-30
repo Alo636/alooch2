@@ -5,7 +5,6 @@ from chatbot.utils import get_connection, obtener_fechas_cerradas, validar_fecha
 from datetime import datetime, timedelta
 import logging
 
-
 load_dotenv()
 # chatbot/functions.py
 
@@ -36,18 +35,14 @@ def get_image(plato=None):
 
 
 def get_contact_info():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT telefono, email, pagina_web FROM contacto LIMIT 1")
-    resultado = cursor.fetchone()
-    conn.close()
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT telefono, email, pagina_web FROM contacto LIMIT 1")
+            resultado = cursor.fetchone()
 
     if resultado:
-        return {
-            "telefono": resultado[0],
-            "email": resultado[1],
-            "pagina_web": resultado[2]
-        }
+        return {"telefono": resultado[0], "email": resultado[1], "pagina_web": resultado[2]}
     else:
         return {"error": "Información de contacto no disponible."}
 
@@ -79,7 +74,7 @@ def get_menu(fecha=None):
     return format_menu_response({"menu": menu})
 
 
-def get_horario(fechas):
+def get_horario_bar(fechas):
     if not fechas:
         return {"error": "Debe proporcionar al menos una fecha o un rango de fechas en formato YYYY-MM-DD."}
 
@@ -122,7 +117,6 @@ def get_horario(fechas):
                 # 3. Si no hay horario especial, obtener horario normal según el día de la semana
                 dia_semana = datetime.strptime(
                     fecha, "%Y-%m-%d").strftime("%A")
-                print(dia_semana)
                 query = "SELECT hora_apertura, hora_cierre FROM horario WHERE dia_semana = %s"
                 cursor.execute(query, (dia_semana,))
                 resultado = cursor.fetchone()
@@ -148,7 +142,7 @@ def get_horario(fechas):
         conn.close()
 
 
-def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False, personas=None):
+def hacer_reserva(fecha=None, hora=None, nombre=None, personas=None, confirmacion=False,):
     """
     Inserta una reserva en la base de datos solo si:
       - La fecha no está en la base de datos de fechas no disponibles.
@@ -183,7 +177,6 @@ def hacer_reserva(fecha=None, hora=None, nombre=None, confirmacion=False, person
         return {"error": "Solo se permiten reservas a las 12:00, 13:00, 14:00 o 15:00."}
 
     disponibilidad = info_reservas(fechas=fecha, horas=hora, personas=personas)
-    print(disponibilidad)
     if disponibilidad.get(f"{fecha} {hora}") == "Ocupada":
         return {"error": "La hora seleccionada ya está ocupada."}
 
@@ -382,7 +375,7 @@ funciones_disponibles = {
     "info_reservas": info_reservas,
     "hacer_reserva": hacer_reserva,
     "eliminar_reserva": eliminar_reserva,
-    "get_horario": get_horario,
+    "get_horario": get_horario_bar,
     "get_contact_info": get_contact_info,
     "get_image": get_image,
     "obtener_datos_usuario": obtener_datos_usuario,
