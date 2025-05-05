@@ -215,7 +215,6 @@ def pregunta_respuesta(user_message, conversation_history, language='es', mensaj
         if function_name in funciones_disponibles:
             function_result = funciones_disponibles[function_name](
                 **parameters)
-
             conversation_end.append({
                 "role": "assistant",
                 "name": function_name,

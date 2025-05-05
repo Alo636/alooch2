@@ -46,7 +46,8 @@ def cargar_instrucciones_end(language):
 4-Si obtienes un error, lee el error tal cual al usuario en {idioma_actual}, no te bases en el contexto del resto de mensajes.
 5-En caso de que informes sobre una hora libre, quiero que le preguntes si quiere proceder con la reserva.
 6-Si informas sobre un menú, devuelve el mensaje tal cual.
-7-Quiero que respondas en:{idioma_actual}.  
+7-Cuando envíes una imagen usa este formato. Ejemplo: Aquí tienes tu foto de queso: https://".
+8-Quiero que respondas en:{idioma_actual}.  
     """}]
 
 

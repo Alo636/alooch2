@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.ERROR,
 
 def get_image(plato=None):
     """
-    Devuelve la URL de la imagen de un plato específico si existe.
+    Devuelve la URL de la imagen de un plato específico si existe en menu_especial o menu_base.
     """
     if not plato:
         return {"error": "Debes especificar un nombre de platillo."}
@@ -22,9 +22,19 @@ def get_image(plato=None):
     conn = get_connection()
     cursor = conn.cursor()
 
-    query = "SELECT imagen_url FROM menu_fecha WHERE nombre_platillo = %s LIMIT 1"
-    cursor.execute(query, (plato,))
+    # Primero busca en menu_especial
+    query_base = "SELECT imagen_url FROM menu_base WHERE nombre_platillo = %s LIMIT 1"
+    cursor.execute(query_base, (plato,))
     resultado = cursor.fetchone()
+
+    if not resultado:
+        query_especial = "SELECT imagen_url FROM menu_especial WHERE nombre_platillo = %s LIMIT 1"
+        cursor.execute(query_especial, (plato,))
+        resultado = cursor.fetchone()
+        # Si no está en menu_especial, busca en menu_base
+        query_base = "SELECT imagen_url FROM menu_base WHERE nombre_platillo = %s LIMIT 1"
+        cursor.execute(query_base, (plato,))
+        resultado = cursor.fetchone()
 
     conn.close()
 
@@ -48,29 +58,49 @@ def get_contact_info():
 
 
 def get_menu(fecha=None):
+    if not fecha:
+        return {"error": "Debe proporcionar una fecha para obtener el menú."}
+
     conn = get_connection()
     cursor = conn.cursor()
 
-    query = """
+    # Paso 1: comprobar si hay menú especial para la fecha
+    cursor.execute("""
         SELECT nombre_platillo, descripcion, precio, imagen_url
-        FROM menu_fecha
+        FROM menu_especial
         WHERE fecha = %s
-    """
-    cursor.execute(query, (fecha,))
-
-    rows = cursor.fetchall()
-    conn.close()
+    """, (fecha,))
+    rows_especial = cursor.fetchall()
 
     menu = []
-    for row in rows:
-        nombre_platillo, descripcion, precio, imagen_url = row
-        menu.append({
-            "nombre_platillo": nombre_platillo,
-            "descripcion": descripcion,
-            "precio": float(precio),
-            "imagen_url": imagen_url
-        })
 
+    if rows_especial:
+        # Usar el menú especial
+        for row in rows_especial:
+            nombre, desc, precio, img = row
+            menu.append({
+                "nombre_platillo": nombre,
+                "descripcion": desc,
+                "precio": float(precio),
+                "imagen_url": img
+            })
+    else:
+        # Usar menú base
+        cursor.execute("""
+            SELECT nombre_platillo, descripcion, precio, imagen_url
+            FROM menu_base
+        """)
+        rows_base = cursor.fetchall()
+        for row in rows_base:
+            nombre, desc, precio, img = row
+            menu.append({
+                "nombre_platillo": nombre,
+                "descripcion": desc,
+                "precio": float(precio),
+                "imagen_url": img
+            })
+
+    conn.close()
     return format_menu_response({"menu": menu})
 
 

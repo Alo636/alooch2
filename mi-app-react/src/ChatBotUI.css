@@ -1,0 +1,69 @@
+/* Importa la fuente desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap');
+
+
+
+.restaurant-name {
+  font-family: 'Nunito Sans', Arial;
+
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+  color: #111; /* Color oscuro para buena lectura */
+}
+
+.chatbot-container {
+    font-family: 'Nunito Sans', sans-serif;
+  }
+
+  .options-menu-dropdown {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .menu-item {
+    all: unset;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 24px auto;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .menu-item img,
+  .menu-item svg {
+    justify-self: start;
+    color: #9f18dd;
+  }
+  
+  .menu-item span {
+    font-size: 0.8rem;
+    color: black;
+  }
+  
+  
+  .language-dropdown {
+    position: absolute;
+    right: 10px;
+    top: calc(100% + 5px);
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 30;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  
+  .language-option {
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+
+  
+  
